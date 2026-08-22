@@ -25,6 +25,7 @@ const writeJson = (relativePath, value) => {
 };
 
 const status = getEditorialDataStatus();
+const includeTechnicalMetadata = process.env.VITE_SHOW_TECHNICAL_METADATA !== 'false';
 const files = [];
 files.push(writeJson('catalog.json', {
   classes: classSpecs,
@@ -36,15 +37,32 @@ files.push(writeJson('catalog.json', {
 files.push(writeJson('sources.json', { sources: getSourceStatus() }));
 files.push(writeJson('demo.json', { ...demo, weights: DEFAULT_WEIGHTS }));
 
-const tierlistPayload = (source, name, catalog) => ({
-  source: name,
-  mode: 'static-json-snapshot',
-  storage: 'JSON estático',
-  cacheHours: status.cacheHours,
-  guideCount: catalog.length,
-  syncErrors: [],
-  guides: loadLatestGuides(source, catalog.map((guide) => guide.id)),
-});
+const publicGuide = (guide) => {
+  const {
+    snapshotId,
+    cacheExpiresAt,
+    contentHash,
+    fetchedAt,
+    itemCount,
+    tierCount,
+    ...content
+  } = guide;
+  return content;
+};
+
+const tierlistPayload = (source, name, catalog) => {
+  const guides = loadLatestGuides(source, catalog.map((guide) => guide.id));
+  if (!includeTechnicalMetadata) return { source: name, guides: guides.map(publicGuide) };
+  return {
+    source: name,
+    mode: 'static-json-snapshot',
+    storage: 'JSON estático',
+    cacheHours: status.cacheHours,
+    guideCount: catalog.length,
+    syncErrors: [],
+    guides,
+  };
+};
 files.push(writeJson('tierlists/wowhead.json', tierlistPayload('wowhead', 'Wowhead', WOWHEAD_GUIDES)));
 files.push(writeJson('tierlists/icyveins.json', tierlistPayload('icyveins', 'Icy Veins', ICYVEINS_GUIDES)));
 
@@ -58,11 +76,16 @@ rankingItems.forEach((item) => {
   }));
 });
 
-const manifest = {
-  schemaVersion: 1,
-  generatedAt: new Date().toISOString(),
-  status,
-  files,
-};
+const manifest = includeTechnicalMetadata
+  ? {
+      schemaVersion: 1,
+      generatedAt: new Date().toISOString(),
+      status,
+      files,
+    }
+  : {
+      schemaVersion: 1,
+      files,
+    };
 writeJson('manifest.json', manifest);
 process.stdout.write(`${JSON.stringify({ output: 'public/data', files: files.length + 1, bytes: files.reduce((sum, file) => sum + file.bytes, 0), status }, null, 2)}\n`);

@@ -6,6 +6,7 @@ import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { localizedItemName } from '../item-localization.js';
 import { usePersistentState } from '../use-persistent-state.js';
+import { showTechnicalMetadata } from '../build-mode.js';
 
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
@@ -51,7 +52,7 @@ export default function IcyVeinsTierlists() {
     <div className="spec-module wowhead-module icyveins-module">
       <header className="rankings-hero">
         <div><p className="eyebrow">{t('guide.eyebrow')}</p><h1>{t('guide.icyTitle')}</h1><p>{t('guide.icySubtitle')}</p></div>
-        <span className="live-parser-badge icy-badge">{t('guide.updatedHourly', { hours: payload.cacheHours })}</span>
+        {showTechnicalMetadata && <span className="live-parser-badge icy-badge">{t('guide.updatedHourly', { hours: payload.cacheHours })}</span>}
       </header>
 
       <section className="panel wowhead-guide-selector">
@@ -71,12 +72,14 @@ export default function IcyVeinsTierlists() {
             </div>
           </div>
         </div>
-        <div className="wowhead-audit-bar">
+        <div className={`wowhead-audit-bar ${showTechnicalMetadata ? '' : 'source-only'}`}>
           <div><span>{t('common.source')}</span><a href={guide.url} target="_blank" rel="noreferrer">{t('guide.original')}</a></div>
-          <div><span>{t('common.coverage')}</span><b>{payload.guideCount}/{payload.guideCount} specs</b></div>
-          <div><span>{t('guide.parsedItems')}</span><b>{guide.itemCount}</b></div>
-          <div><span>{t('guide.detectedTiers')}</span><b>{guide.tierCount}</b></div>
-          <div><span>{t('guide.snapshot')}</span><b>#{guide.snapshotId} · {t('guide.updatedHourly', { hours: payload.cacheHours })}</b></div>
+          {showTechnicalMetadata && <>
+            <div><span>{t('common.coverage')}</span><b>{payload.guideCount}/{payload.guideCount} specs</b></div>
+            <div><span>{t('guide.parsedItems')}</span><b>{guide.itemCount}</b></div>
+            <div><span>{t('guide.detectedTiers')}</span><b>{guide.tierCount}</b></div>
+            <div><span>{t('guide.snapshot')}</span><b>#{guide.snapshotId} · {t('guide.updatedHourly', { hours: payload.cacheHours })}</b></div>
+          </>}
         </div>
       </section>
 

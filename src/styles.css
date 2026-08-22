@@ -129,6 +129,7 @@ header p { color: #777d89; margin: 0; }
 .guide-tabs b { font-size: 10px; }
 .guide-tabs small { color: #676e7a; font-size: 8px; }
 .wowhead-audit-bar { min-height: 62px; display: grid; grid-template-columns: 1.25fr .65fr .65fr .65fr 1fr; border-top: 1px solid #242731; background: #0d1015; }
+.wowhead-audit-bar.source-only { min-height: 52px; grid-template-columns: 1fr; }
 .wowhead-audit-bar > div { padding: 12px 18px; display: grid; align-content: center; gap: 4px; border-right: 1px solid #242731; }
 .wowhead-audit-bar > div:last-child { border: 0; }
 .wowhead-audit-bar span { color: #606773; font-size: 8px; text-transform: uppercase; letter-spacing: .08em; }
