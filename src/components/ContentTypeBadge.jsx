@@ -6,6 +6,7 @@ const CONTENT_TYPE_KEYS = {
   dungeon: 'common.mythicPlus',
   delves: 'common.delves',
   crafting: 'common.crafting',
+  pvp: 'common.pvp',
   unknown: 'common.unknown',
 };
 

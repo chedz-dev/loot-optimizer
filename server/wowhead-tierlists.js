@@ -8,6 +8,7 @@ import {
 } from './editorial-store.js';
 import { WOWHEAD_GUIDES } from './guide-catalog.js';
 import { mapWithConcurrency } from './sync-guides.js';
+import { localizeGuideItems } from './wowhead-localization.js';
 
 export { WOWHEAD_GUIDES } from './guide-catalog.js';
 
@@ -175,14 +176,15 @@ export async function syncWowheadTierlists({ force = false, guideIds, concurrenc
 
   synchronization = mapWithConcurrency(targets, concurrency, async (guide) => {
     return fetchWowheadGuide(guide);
-  }).then((results) => {
+  }).then(async (results) => {
     const parsedGuides = results.filter((result) => result.status === 'fulfilled').map((result) => result.value);
+    const localization = await localizeGuideItems(parsedGuides);
     const saved = saveGuideSnapshots('wowhead', parsedGuides);
     const errors = results.flatMap((result, index) => result.status === 'rejected'
       ? [{ guideId: targets[index].id, url: targets[index].url, error: result.reason?.message || String(result.reason) }]
       : []);
     lastSyncErrors = errors;
-    return { source: 'wowhead', attempted: targets.length, saved: saved.length, snapshots: saved, errors };
+    return { source: 'wowhead', attempted: targets.length, saved: saved.length, snapshots: saved, errors, localizationErrors: localization.errors };
   }).finally(() => { synchronization = null; });
   return synchronization;
 }

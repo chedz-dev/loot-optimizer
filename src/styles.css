@@ -198,28 +198,34 @@ header p { color: #777d89; margin: 0; }
 }
 
 /* Legibility pass: keep operational labels readable on desktop and mobile. */
-body { font-size: 14px; line-height: 1.45; }
-nav button { font-size: 13px; }
-header p { font-size: 14px; line-height: 1.55; }
+body { font-size: 16px; line-height: 1.5; }
+nav button { font-size: 14px; }
+header p { font-size: 15px; line-height: 1.6; }
 .season-card small, .eyebrow, .panel-head small, .method-grid > div > small,
 .source-strip > div small, .filter-block > label, .spec-identity small,
 .best-item > small, .confidence-card small, .selector-title small,
 .selected-item-summary small, .tier-summary > small, .live-parser-badge,
 .complete-guide-picker > label > span, .wowhead-audit-bar span,
-.wowhead-note-panel small, .icy-guide-meta span { font-size: 10px; }
+.wowhead-note-panel small, .icy-guide-meta span { font-size: 12px; }
 .source-pill > span:last-child, .model-note, .ranking-footnote,
-.wowhead-method-note { font-size: 12px; }
+.wowhead-method-note { font-size: 13px; }
 .source-pill small, .rank-person small, .table-item small, .item-picker small,
 .selected-item-summary p, .wowhead-tier-head p, .wowhead-tier-items article > button small,
-.guide-tabs small, .icy-guide-meta b { font-size: 10px; }
+.guide-tabs small, .icy-guide-meta b { font-size: 12px; }
 .segment-control button, .complete-guide-picker select, .guide-tabs b,
 .item-picker b, .class-cell b, .spec-cell b, .tier-specs article b,
 .wowhead-tier-items article > button b, .wowhead-audit-bar b,
-.wowhead-audit-bar a, .guide-note p { font-size: 12px; }
+.wowhead-audit-bar a, .guide-note p { font-size: 13px; }
 .ranking-head, .spec-table-head, .item-spec-head, .use-type,
-.evidence-chips span, .role-chip, .wowhead-source, .source-badge { font-size: 10px; }
-.wowhead-note-panel h2 { font-size: 16px; }
-.wowhead-note-panel > a { font-size: 11px; }
+.evidence-chips span, .role-chip, .wowhead-source, .source-badge { font-size: 11px; }
+.wowhead-note-panel h2 { font-size: 18px; }
+.wowhead-note-panel > a { font-size: 13px; }
+.wowhead-tier-items { grid-template-columns: repeat(auto-fill, minmax(255px, 1fr)); }
+.wowhead-tier-items article { min-height: 78px; padding: 10px; }
+.item-picker > button { min-height: 92px; padding: 13px; }
+.item-picker b { font-size: 13px; }
+.item-picker small { font-size: 11px; }
+.selected-item-summary h2 { font-size: 18px; }
 
 @media (max-width: 800px) {
   .engine-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); }

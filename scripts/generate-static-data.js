@@ -7,6 +7,7 @@ import { classSpecs, getItemRankings, rankingItems } from '../server/rankings-da
 import { getSourceStatus } from '../server/sources.js';
 import {
   getEditorialDataStatus,
+  getCanonicalItem,
   getRankingSignalsForItem,
   loadLatestGuides,
 } from '../server/editorial-store.js';
@@ -27,7 +28,10 @@ const status = getEditorialDataStatus();
 const files = [];
 files.push(writeJson('catalog.json', {
   classes: classSpecs,
-  items: rankingItems.map(({ profile, ...item }) => item),
+  items: rankingItems.map(({ profile, ...item }) => {
+    const canonical = getCanonicalItem(item.itemId);
+    return canonical?.localizedNames ? { ...item, localizedNames: canonical.localizedNames } : item;
+  }),
 }));
 files.push(writeJson('sources.json', { sources: getSourceStatus() }));
 files.push(writeJson('demo.json', { ...demo, weights: DEFAULT_WEIGHTS }));
@@ -46,7 +50,12 @@ files.push(writeJson('tierlists/icyveins.json', tierlistPayload('icyveins', 'Icy
 
 rankingItems.forEach((item) => {
   const content = item.category === 'mythic-plus' ? 'mythic-plus' : 'raid';
-  files.push(writeJson(`rankings/${item.id}.json`, getItemRankings(item.id, content, getRankingSignalsForItem(item.itemId))));
+  const result = getItemRankings(item.id, content, getRankingSignalsForItem(item.itemId));
+  const canonical = getCanonicalItem(item.itemId);
+  files.push(writeJson(`rankings/${item.id}.json`, {
+    ...result,
+    item: canonical?.localizedNames ? { ...result.item, localizedNames: canonical.localizedNames } : result.item,
+  }));
 });
 
 const manifest = {
@@ -57,4 +66,3 @@ const manifest = {
 };
 writeJson('manifest.json', manifest);
 process.stdout.write(`${JSON.stringify({ output: 'public/data', files: files.length + 1, bytes: files.reduce((sum, file) => sum + file.bytes, 0), status }, null, 2)}\n`);
-

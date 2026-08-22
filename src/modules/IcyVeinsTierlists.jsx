@@ -4,6 +4,7 @@ import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
+import { localizedItemName } from '../item-localization.js';
 
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
@@ -90,7 +91,7 @@ export default function IcyVeinsTierlists() {
                     <ItemIcon item={item} tooltip />
                     <button onClick={() => setSelectedItemId(item.itemId)}>
                       <ContentTypeBadge types={item.contentTypes} />
-                      <b>{item.name}</b>
+                      <b>{localizedItemName(item, language)}</b>
                       <small>{item.guideNote || `Item ${item.itemId}`}</small>
                     </button>
                   </article>
@@ -104,7 +105,7 @@ export default function IcyVeinsTierlists() {
       {selectedItem && (
         <section className="panel wowhead-note-panel icy-note-panel">
           <ItemIcon item={selectedItem} tooltip />
-          <div><small>{t('common.selectedItem')}</small><h2>{selectedItem.name}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
+          <div><small>{t('common.selectedItem')}</small><h2>{localizedItemName(selectedItem, language)}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
           <div className="guide-note"><small>{t('guide.comment')}</small><p>{selectedItem.guideNote || t('guide.noComment')}</p></div>
           <a href={guide.url} target="_blank" rel="noreferrer">{t('guide.compareIcy')}</a>
         </section>

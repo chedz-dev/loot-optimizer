@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { canonicalItemOrigins } from './item-origins.js';
 
 export const SNAPSHOT_TTL_MS = 60 * 60 * 1000;
 
@@ -65,15 +66,16 @@ function resolveGuide(store, guide) {
     items: tier.items.map((item) => {
       const canonical = items.get(item.itemId);
       const signalContentTypes = item.signalContentTypes || [];
-      const originTypes = canonical?.originTypes || item.originTypes || [];
+      const originTypes = canonicalItemOrigins.get(item.itemId) || canonical?.originTypes || item.originTypes || [];
       return {
         ...item,
         name: canonical?.name || item.name,
+        localizedNames: canonical?.localizedNames || item.localizedNames || { en: canonical?.name || item.name },
         icon: canonical?.icon || item.icon || '',
         wowheadUrl: canonical?.wowheadUrl || item.wowheadUrl || `https://www.wowhead.com/item=${item.itemId}`,
         signalContentTypes,
         originTypes,
-        contentTypes: signalContentTypes.length ? signalContentTypes : originTypes,
+        contentTypes: originTypes.length ? originTypes : signalContentTypes,
       };
     }),
   }));
@@ -98,10 +100,17 @@ function applyGuideSnapshot(source, guide, store) {
       const signalContentTypes = item.signalContentTypes
         || (source === 'wowhead' ? item.contentTypes || [] : []);
       const existing = items.get(item.itemId);
-      const originTypes = [...new Set([...(existing?.originTypes || []), ...signalContentTypes.filter((type) => type && type !== 'unknown')])].sort();
+      const inferredOrigins = signalContentTypes.filter((type) => type && type !== 'unknown');
+      const originTypes = canonicalItemOrigins.get(item.itemId)
+        || [...new Set([...(existing?.originTypes || []), ...inferredOrigins])].sort();
       const canonical = {
         itemId: item.itemId,
         name: item.name || existing?.name || `Item ${item.itemId}`,
+        localizedNames: {
+          ...(existing?.localizedNames || {}),
+          en: item.localizedNames?.en || item.name || existing?.localizedNames?.en || existing?.name || `Item ${item.itemId}`,
+          ...(item.localizedNames?.es ? { es: item.localizedNames.es } : {}),
+        },
         icon: item.icon || existing?.icon || '',
         quality: item.quality || existing?.quality || 0,
         wowheadUrl: item.wowheadUrl || existing?.wowheadUrl || `https://www.wowhead.com/item=${item.itemId}`,
@@ -113,7 +122,7 @@ function applyGuideSnapshot(source, guide, store) {
         ...item,
         signalContentTypes,
         originTypes,
-        contentTypes: signalContentTypes.length ? signalContentTypes : originTypes,
+        contentTypes: originTypes.length ? originTypes : signalContentTypes,
         tier: tier.label,
         displayOrder: item.displayOrder || 1,
         tierOrder: tierIndex + 1,
@@ -238,6 +247,12 @@ export function saveRankingSignals({ sourceId, sourceName, sourceKind, snapshotK
 
 export function getRankingSignalsForItem(itemId, store = getEditorialStore()) {
   return clone(store.data.signals.filter((signal) => signal.itemId === Number(itemId)));
+}
+
+export function getCanonicalItem(itemId, store = getEditorialStore()) {
+  const item = store.data.items.find((entry) => entry.itemId === Number(itemId));
+  if (!item) return null;
+  return clone({ ...item, originTypes: canonicalItemOrigins.get(item.itemId) || item.originTypes || [] });
 }
 
 export function getEditorialSignalsForItem(itemId, store = getEditorialStore()) {

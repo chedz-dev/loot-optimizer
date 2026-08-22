@@ -95,7 +95,7 @@ test('Icy Veins hereda la procedencia canónica sin alterar el contexto de su se
     specName: 'Fire',
     tiers: icyParsed.tiers.map((tier) => ({
       ...tier,
-      items: tier.items.map((item) => ({ ...item, contentTypes: ['dungeon'] })),
+      items: tier.items.map((item) => ({ ...item, contentTypes: ['dungeon', 'raid'] })),
     })),
   };
   saveGuideSnapshot('wowhead', wowheadParsed, store);
@@ -107,6 +107,13 @@ test('Icy Veins hereda la procedencia canónica sin alterar el contexto de su se
   const signal = getRankingSignalsForItem(250215, store).find((entry) => entry.source === 'icyveins');
   assert.equal(signal.contentType, 'all');
   assert.equal(signal.signalType, 'editorial-tier');
+});
+
+test('clasifica alternativas editoriales fuera del catálogo principal', () => {
+  const store = createEditorialStore();
+  const parsed = parseIcyVeinsGuideHtml(fixture.replaceAll('250215', '245752').replaceAll("Freightrunner's Flask", "Thalassian Competitor's Insignia of Alacrity"), guide);
+  saveGuideSnapshot('icyveins', parsed, store);
+  assert.deepEqual(loadLatestGuide('icyveins', guide.id, store).tiers[0].items[0].contentTypes, ['pvp']);
 });
 
 test('el modelo normalizado admite una señal empírica con muestra y confianza', () => {

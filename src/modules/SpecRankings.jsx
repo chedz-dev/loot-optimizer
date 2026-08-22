@@ -3,6 +3,7 @@ import ItemIcon, { WowheadLink } from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
+import { localizedItemName } from '../item-localization.js';
 
 const sourceAbbreviations = { wowhead: 'WH', icyveins: 'IV', warcraftlogs: 'WCL', bloodmallet: 'BM' };
 
@@ -11,7 +12,7 @@ const sourceEvidence = (entry) => Object.values(entry.sourceScores || {}).map((s
 )).join(' · ');
 
 export default function SpecRankings() {
-  const { t } = useI18n();
+  const { language, t } = useI18n();
   const [items, setItems] = useState([]);
   const [itemId, setItemId] = useState('gebbo');
   const [content, setContent] = useState('all');
@@ -47,10 +48,10 @@ export default function SpecRankings() {
     const normalizedSearch = search.trim().toLocaleLowerCase();
     return items.filter((item) => {
       const matchesSource = content === 'all' || item.category === content;
-      const matchesSearch = !normalizedSearch || `${item.name} ${item.drop.encounter} ${item.drop.instance}`.toLocaleLowerCase().includes(normalizedSearch);
+      const matchesSearch = !normalizedSearch || `${localizedItemName(item, language)} ${item.name} ${item.drop.encounter} ${item.drop.instance}`.toLocaleLowerCase().includes(normalizedSearch);
       return matchesSource && matchesSearch;
     });
-  }, [content, items, search]);
+  }, [content, items, language, search]);
 
   const visibleRankings = useMemo(() => {
     if (!result) return [];
@@ -73,7 +74,7 @@ export default function SpecRankings() {
           {visibleItems.map((item) => (
             <button key={item.id} className={itemId === item.id ? 'active' : ''} onClick={() => setItemId(item.id)}>
               <ItemIcon item={item} />
-              <span><span className={`source-badge source-${item.category}`}>{item.category === 'raid' ? 'RAID' : 'M+'}</span><b>{item.name}</b><small>{item.drop.encounter} · {item.drop.instance}</small></span>
+              <span><span className={`source-badge source-${item.category}`}>{item.category === 'raid' ? 'RAID' : 'M+'}</span><b>{localizedItemName(item, language)}</b><small>{item.drop.encounter} · {item.drop.instance}</small></span>
               <i />
             </button>
           ))}
@@ -85,7 +86,7 @@ export default function SpecRankings() {
       {loading || !result ? <div className="module-loading">{t('rank.loading')}</div> : (
         <>
           <section className="item-ranking-summary">
-            <div className="panel selected-item-summary"><div className="selected-tooltip"><ItemIcon item={result.item} tooltip /><span>{t('rank.hover')}</span></div><div><small>{t('common.selectedItem')}</small><h2>{result.item.name}</h2><p><b>{result.item.drop.encounter}</b> · {result.item.drop.instance} · {result.item.drop.sourceType}</p><WowheadLink item={result.item} /></div><div className="evidence-chips">{result.metadata.sources.map((source) => <span key={source.id}>{source.name} {Math.round(source.weight * 100)}%</span>)}</div></div>
+            <div className="panel selected-item-summary"><div className="selected-tooltip"><ItemIcon item={result.item} tooltip /><span>{t('rank.hover')}</span></div><div><small>{t('common.selectedItem')}</small><h2>{localizedItemName(result.item, language)}</h2><p><b>{result.item.drop.encounter}</b> · {result.item.drop.instance} · {result.item.drop.sourceType}</p><WowheadLink item={result.item} /></div><div className="evidence-chips">{result.metadata.sources.map((source) => <span key={source.id}>{source.name} {Math.round(source.weight * 100)}%</span>)}</div></div>
             <div className="panel tier-summary"><small>{t('rank.distribution')}</small>{['S', 'A', 'B', 'C'].map((tier) => <span key={tier} className={`tier-count tier-${tier.toLowerCase()}`}><b>{tier}</b>{tierCounts[tier] || 0}</span>)}</div>
           </section>
 

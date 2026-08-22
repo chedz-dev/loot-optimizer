@@ -7,7 +7,12 @@ import { getRaiderIoCharacter, getSourceStatus } from './sources.js';
 import { classSpecs, getItemRankings, getSpecRankings, rankingItems } from './rankings-data.js';
 import { getWowheadTierlists } from './wowhead-tierlists.js';
 import { getIcyVeinsTierlists } from './icyveins-tierlists.js';
-import { getEditorialDataStatus, getRankingSignalsForItem } from './editorial-store.js';
+import { getCanonicalItem, getEditorialDataStatus, getRankingSignalsForItem } from './editorial-store.js';
+
+const withLocalizedName = (item) => {
+  const canonical = getCanonicalItem(item.itemId);
+  return canonical?.localizedNames ? { ...item, localizedNames: canonical.localizedNames } : item;
+};
 
 const app = express();
 
@@ -19,7 +24,7 @@ app.get('/api/sources', (_req, res) => res.json({ sources: getSourceStatus() }))
 app.get('/api/demo', (_req, res) => res.json({ ...demo, weights: DEFAULT_WEIGHTS }));
 app.get('/api/rankings/catalog', (_req, res) => res.json({
   classes: classSpecs,
-  items: rankingItems.map(({ profile, ...item }) => item),
+  items: rankingItems.map(({ profile, ...item }) => withLocalizedName(item)),
 }));
 app.get('/api/rankings', (req, res) => {
   try {
@@ -33,7 +38,8 @@ app.get('/api/rankings/item', async (req, res) => {
     const base = getItemRankings(req.query.item, req.query.content);
     await Promise.allSettled([getWowheadTierlists(), getIcyVeinsTierlists()]);
     const signals = getRankingSignalsForItem(base.item.itemId);
-    return res.json(getItemRankings(req.query.item, req.query.content, signals));
+    const result = getItemRankings(req.query.item, req.query.content, signals);
+    return res.json({ ...result, item: withLocalizedName(result.item) });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
