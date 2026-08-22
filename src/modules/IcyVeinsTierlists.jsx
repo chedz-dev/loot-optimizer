@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import ItemIcon from '../components/ItemIcon.jsx';
+import { useEffect, useMemo, useState } from 'react';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
-import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
+import EditorialItemCard from '../components/EditorialItemCard.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
-import { localizedItemName } from '../item-localization.js';
 import { usePersistentState } from '../use-persistent-state.js';
 import { showTechnicalMetadata } from '../build-mode.js';
 
@@ -15,9 +13,8 @@ export default function IcyVeinsTierlists() {
   const [payload, setPayload] = useState(null);
   const [classId, setClassId] = usePersistentState('loot-icyveins-class', 'hunter');
   const [guideId, setGuideId] = usePersistentState('loot-icyveins-guide', 'hunter-beast-mastery');
-  const [selectedItemId, setSelectedItemId] = usePersistentState('loot-icyveins-item', null);
+  const [expandedCard, setExpandedCard] = useState(null);
   const [error, setError] = useState('');
-  const previousGuideId = useRef(guideId);
 
   useEffect(() => {
     dataFetch('/api/icyveins/tierlists').then(async (response) => {
@@ -34,13 +31,7 @@ export default function IcyVeinsTierlists() {
   }, [payload]);
   const classGuides = useMemo(() => payload?.guides.filter((entry) => entry.classId === classId) || [], [payload, classId]);
   const guide = classGuides.find((entry) => entry.id === guideId) || classGuides[0] || payload?.guides[0];
-  const items = guide?.tiers.flatMap((tier) => tier.items) || [];
-  const selectedItem = items.find((item) => item.itemId === selectedItemId) || items[0];
-
-  useEffect(() => {
-    if (previousGuideId.current !== guideId) setSelectedItemId(null);
-    previousGuideId.current = guideId;
-  }, [guideId]);
+  useEffect(() => { setExpandedCard(null); }, [guideId]);
   useEffect(() => { window.$WowheadPower?.refreshLinks?.(); }, [guide]);
 
   if (error) {
@@ -94,30 +85,15 @@ export default function IcyVeinsTierlists() {
             <section className={`wowhead-tier-row tier-source-${tierClass(tier.label)}`} key={tier.label}>
               <div className="wowhead-tier-label"><b>{tier.label}</b><span>{tier.items.length}</span></div>
               <div className="wowhead-tier-items">
-                {tier.items.map((item) => (
-                  <article key={`${item.itemId}-${item.displayOrder}`} className={selectedItem?.itemId === item.itemId ? 'selected' : ''}>
-                    <ItemIcon item={item} tooltip />
-                    <button onClick={() => setSelectedItemId(item.itemId)}>
-                      <ContentTypeBadge types={item.contentTypes} />
-                      <b>{localizedItemName(item, language)}</b>
-                      <small>{item.guideNote || `Item ${item.itemId}`}</small>
-                    </button>
-                  </article>
-                ))}
+                {tier.items.map((item) => {
+                  const cardKey = `${guide.id}:${tier.label}:${item.itemId}:${item.displayOrder}`;
+                  return <EditorialItemCard key={cardKey} item={item} expanded={expandedCard === cardKey} onToggle={() => setExpandedCard((current) => current === cardKey ? null : cardKey)} />;
+                })}
               </div>
             </section>
           ))}
         </div>
       </section>
-
-      {selectedItem && (
-        <section className="panel wowhead-note-panel icy-note-panel">
-          <ItemIcon item={selectedItem} tooltip />
-          <div><small>{t('common.selectedItem')}</small><h2>{localizedItemName(selectedItem, language)}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
-          <div className="guide-note"><small>{t('guide.comment')}</small><p>{selectedItem.guideNote || t('guide.noComment')}</p></div>
-          <a href={guide.url} target="_blank" rel="noreferrer">{t('guide.compareIcy')}</a>
-        </section>
-      )}
 
       <p className="wowhead-method-note">{t('guide.icyMethod')}</p>
     </div>

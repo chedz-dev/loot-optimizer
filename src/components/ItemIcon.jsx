@@ -3,7 +3,7 @@ import { localizedItemName, localizedWowheadUrl } from '../item-localization.js'
 
 const FALLBACK_ICON = 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg';
 
-export default function ItemIcon({ item, size = 'normal', tooltip = false }) {
+export default function ItemIcon({ item, size = 'normal', tooltip = false, onClick }) {
   const { language, t } = useI18n();
   const name = localizedItemName(item, language);
   const src = item?.icon
@@ -26,6 +26,7 @@ export default function ItemIcon({ item, size = 'normal', tooltip = false }) {
       data-wowhead={`item=${item.itemId}`}
       aria-label={t('icon.tooltip', { name })}
       title={t('icon.open', { name })}
+      onClick={onClick}
     >
       {icon}
     </a>

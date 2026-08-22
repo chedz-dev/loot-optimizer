@@ -83,6 +83,21 @@ test('recupera todos los items cuando Icy Veins omite cierres de li', () => {
   assert.deepEqual(result.tiers[0].items.map((item) => item.displayOrder), [1, 2, 3]);
 });
 
+test('captura el comentario aunque el item no use spell_icon_span', () => {
+  const compactFixture = fixture.replace(
+    `<span class="spell_icon_span"><img class="spell_icon" src="//static.icy-veins.com/images/wow/large_icons/inv_alchemy_90_flask_red.jpg" alt="Freightrunner's Flask Icon" /> <span data-wowhead="item=250215" class="q3">Freightrunner's Flask</span></span> &mdash; Best on-use Trinket`,
+    `<span data-wowhead="item=250215" class="q3">Freightrunner's Flask</span> &mdash; Best on-use Trinket`,
+  );
+  const result = parseIcyVeinsGuideHtml(compactFixture, guide);
+  assert.equal(result.tiers[0].items[0].guideNote, 'Best on-use Trinket');
+});
+
+test('ignora Click for Details como comentario cuando no existe una descripción', () => {
+  const placeholderFixture = fixture.replace('&mdash; Best on-use Trinket', '- Click for Details');
+  const result = parseIcyVeinsGuideHtml(placeholderFixture, guide);
+  assert.equal(result.tiers[0].items[0].guideNote, '');
+});
+
 test('rechaza una tier con items en un contenedor desconocido en lugar de guardar datos parciales', () => {
   const unsupportedFixture = fixture.replace(
     /<li><span class="spell_icon_span">[\s\S]*?<\/li>/,
@@ -100,6 +115,11 @@ test('persiste y reconstruye snapshots editoriales en JSON', () => {
   const stored = loadLatestGuide('icyveins', guide.id, store);
   assert.equal(stored.snapshotId, 1);
   assert.equal(stored.tiers[0].items[0].guideNote, 'Best on-use Trinket');
+  assert.deepEqual(stored.tiers[0].items[0].drop, {
+    encounter: 'Zaen Bladesorrow',
+    instance: 'Murder Row',
+    sourceType: 'Mythic+',
+  });
   const signals = getEditorialSignalsForItem(250215, store);
   assert.equal(signals[0].tier, 'S');
   assert.equal(signals[0].spec_id, 'arcane');
@@ -157,6 +177,25 @@ test('clasifica alternativas editoriales fuera del catálogo principal', () => {
   const parsed = parseIcyVeinsGuideHtml(fixture.replaceAll('250215', '245752').replaceAll("Freightrunner's Flask", "Thalassian Competitor's Insignia of Alacrity"), guide);
   saveGuideSnapshot('icyveins', parsed, store);
   assert.deepEqual(loadLatestGuide('icyveins', guide.id, store).tiers[0].items[0].contentTypes, ['pvp']);
+});
+
+test('una etiqueta editorial incorrecta no convierte Gaze of the Alnseer en un item de Delves', () => {
+  const store = createEditorialStore();
+  const parsed = parseIcyVeinsGuideHtml(
+    fixture.replaceAll('250215', '249343').replaceAll("Freightrunner's Flask", 'Gaze of the Alnseer'),
+    guide,
+  );
+  parsed.tiers[0].items[0].contentTypes = ['delves', 'raid'];
+  saveGuideSnapshot('wowhead', parsed, store);
+  const item = loadLatestGuide('wowhead', guide.id, store).tiers[0].items[0];
+  assert.deepEqual(item.contentTypes, ['raid']);
+  assert.deepEqual(item.originTypes, ['raid']);
+  assert.deepEqual(item.drop, {
+    encounter: 'Chimaerus',
+    instance: 'The Dreamrift',
+    sourceType: 'Raid',
+  });
+  assert.deepEqual(item.season, { id: 'midnight-s1', label: 'S1' });
 });
 
 test('el modelo normalizado admite una señal empírica con muestra y confianza', () => {

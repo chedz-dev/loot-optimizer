@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { canonicalItemOrigins } from './item-origins.js';
+import { canonicalItemDropDetails, canonicalItemOrigins, canonicalItemSeasons } from './item-origins.js';
 
 export const SNAPSHOT_TTL_MS = 60 * 60 * 1000;
 
@@ -73,6 +73,8 @@ function resolveGuide(store, guide) {
         localizedNames: canonical?.localizedNames || item.localizedNames || { en: canonical?.name || item.name },
         icon: canonical?.icon || item.icon || '',
         wowheadUrl: canonical?.wowheadUrl || item.wowheadUrl || `https://www.wowhead.com/item=${item.itemId}`,
+        drop: canonicalItemDropDetails.get(item.itemId) || item.drop || null,
+        season: canonicalItemSeasons.get(item.itemId) || item.season || null,
         signalContentTypes,
         originTypes,
         contentTypes: originTypes.length ? originTypes : signalContentTypes,

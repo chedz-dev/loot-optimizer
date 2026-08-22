@@ -36,6 +36,13 @@ function stripHtml(value = '') {
     .trim();
 }
 
+function cleanGuideNote(value = '') {
+  const note = stripHtml(value)
+    .replace(/^(?:—|-)?\s*click for details\s*$/i, '')
+    .trim();
+  return note;
+}
+
 function findTrinketTable(html, guide) {
   const identity = `${guide.specName} ${guide.className} Trinket Rankings`.toLocaleLowerCase();
   const seasonalIdentity = new RegExp(`\\b${guide.specName}\\s+Season\\s+\\d+\\s+Trinket Rankings\\b`, 'i');
@@ -69,8 +76,8 @@ function parseItemMarkup(markup, tier, displayOrder, noteMarkup = null) {
     || markup.match(/<img[^>]+src="([^"]+)"[^>]+class="spell_icon"/i)?.[1]
     || '';
   const quality = Number(markup.match(/class="q(\d+)"/i)?.[1] || 0);
-  const outerEnd = markup.lastIndexOf('</span></span>');
-  const resolvedNoteMarkup = noteMarkup ?? (outerEnd >= 0 ? markup.slice(outerEnd + '</span></span>'.length) : '');
+  const itemEnd = (itemMatch.index || 0) + itemMatch[0].length;
+  const resolvedNoteMarkup = noteMarkup ?? markup.slice(itemEnd);
   return {
     itemId,
     name: stripHtml(itemMatch[2]),
@@ -79,7 +86,7 @@ function parseItemMarkup(markup, tier, displayOrder, noteMarkup = null) {
     displayOrder,
     quality,
     contentTypes: [],
-    guideNote: stripHtml(resolvedNoteMarkup),
+    guideNote: cleanGuideNote(resolvedNoteMarkup),
     noteKey: '',
     wowheadUrl: `https://www.wowhead.com/item=${itemId}`,
   };

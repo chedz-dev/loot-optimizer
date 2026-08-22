@@ -151,20 +151,35 @@ header p { color: #777d89; margin: 0; }
 .tier-source-b .wowhead-tier-label { color: #a4d7ff; background: linear-gradient(145deg, #285276, #1b354d); }
 .tier-source-c .wowhead-tier-label { color: #b7ef9c; background: linear-gradient(145deg, #35562a, #23391c); }
 .tier-source-d .wowhead-tier-label, .tier-source-f .wowhead-tier-label { color: #d0d3d8; background: linear-gradient(145deg, #4a4d53, #2d3035); }
-.wowhead-tier-items { padding: 9px; display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 7px; align-content: start; }
-.wowhead-tier-items article { min-width: 0; min-height: 70px; padding: 8px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 9px; border: 1px solid #292d35; border-radius: 6px; background: #151820; }
-.wowhead-tier-items article.selected { border-color: #987842; box-shadow: inset 0 0 18px #b88b2822; }
+.wowhead-tier-items { padding: 9px; display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 7px; align-content: start; align-items: start; }
+.wowhead-tier-items article { min-width: 0; min-height: 70px; padding: 10px; display: grid; grid-template-columns: auto 1fr; align-items: start; gap: 9px; border: 1px solid #292d35; border-radius: 6px; background: #151820; transition: border-color .15s ease, background .15s ease, box-shadow .15s ease; }
+.wowhead-tier-items article.expandable:hover, .wowhead-tier-items article.expandable:focus-within { border-color: #515867; background: linear-gradient(120deg, #20242d, #171b23); box-shadow: inset 0 0 22px #75829a12; }
+.wowhead-tier-items article.expanded { border-color: #5c6575; background: linear-gradient(120deg, #20242c, #151920); box-shadow: inset 0 0 24px #7c8ba818; }
 .wowhead-tier-items .item-icon { width: 45px; height: 45px; flex-basis: 45px; border-color: #725a35; }
-.wowhead-tier-items article > button { min-width: 0; padding: 0; display: grid; justify-items: start; gap: 3px; border: 0; color: inherit; background: transparent; cursor: pointer; text-align: left; }
-.wowhead-tier-items article.wowhead-clickable-item { padding: 0; }.wowhead-item-card-link { min-width: 0; height: 100%; padding: 10px; display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 9px; color: inherit; text-decoration: none; }.wowhead-item-card-link:hover { background: #1a1e27; }.wowhead-item-copy { min-width: 0; display: grid; justify-items: start; gap: 3px; }.wowhead-item-copy b { width: 100%; overflow: hidden; color: #dedfe3; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }.wowhead-item-copy small { color: #747c89; font-size: 11px; }
-.wowhead-tier-items article > button b { width: 100%; overflow: hidden; color: #dedfe3; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
-.wowhead-tier-items article > button small { color: #626a76; font-size: 8px; }
+.editorial-card-body { min-width: 0; width: 100%; padding: 0; display: grid; justify-items: stretch; gap: 6px; border: 0; color: inherit; background: transparent; text-align: left; font: inherit; }
+button.editorial-card-body { cursor: pointer; }
+button.editorial-card-body:focus-visible { border-radius: 3px; outline: 2px solid #69758a; outline-offset: 3px; }
+.editorial-card-heading { min-width: 0; display: grid; justify-items: start; gap: 4px; }
+.editorial-card-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.editorial-season-badge { padding: 2px 5px; border: 1px solid #77642d; border-radius: 3px; color: #e6c867; background: #2b2511; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+.editorial-card-heading > b { width: 100%; overflow: hidden; color: #dedfe3; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.editorial-description { overflow: hidden; display: -webkit-box; color: #9ba2ad; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
+.editorial-description.full { display: block; overflow: visible; -webkit-line-clamp: unset; }
+.editorial-expand-control { display: inline-flex; align-items: center; gap: 6px; color: #aeb7c5; font-size: 11px; font-weight: 700; }
+.editorial-chevron { width: 7px; height: 7px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; transform: rotate(45deg) translateY(-2px); transition: transform .15s ease; }
+.expanded .editorial-chevron { transform: rotate(225deg) translate(-1px, -1px); }
+.editorial-drop-details { margin-top: 2px; padding-top: 8px; display: grid; gap: 6px; border-top: 1px solid #343944; }
+.editorial-details-title { color: #c6a762; font-size: 11px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; }
+.editorial-drop-details > span:not(.editorial-details-title) { display: grid; gap: 1px; }
+.editorial-drop-details small { color: #6f7784; font-size: 11px; text-transform: uppercase; }
+.editorial-drop-details b { color: #c7cbd2; font-size: 12px; font-weight: 600; }
 .wowhead-source { display: inline-flex; padding: 2px 5px; border: 1px solid #454b56; border-radius: 3px; color: #8e96a2; background: #171b22; font-size: 7px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .wowhead-source.source-raid { border-color: #704b78; color: #d98ce2; background: #241628; }
 .wowhead-source.source-dungeon { border-color: #306b87; color: #78c9ed; background: #10232c; }
 .wowhead-source.source-delves { border-color: #397349; color: #84d89a; background: #12261a; }
 .wowhead-source.source-crafting { border-color: #8a5528; color: #e8a360; background: #2a1b0f; }
 .wowhead-note-panel { margin-top: 12px; min-height: 105px; padding: 15px 18px; display: grid; grid-template-columns: auto minmax(170px, .65fr) minmax(280px, 1.35fr) auto; align-items: center; gap: 14px; }
+.wowhead-note-panel.note-without-action { grid-template-columns: auto minmax(170px, .65fr) minmax(280px, 1.35fr); }
 .wowhead-note-panel > .item-tooltip-anchor .item-icon { width: 54px; height: 54px; flex-basis: 54px; border-color: #8b6f42; }
 .wowhead-note-panel > div:nth-child(2) { display: grid; justify-items: start; gap: 4px; }
 .wowhead-note-panel small { color: #8c7548; font-size: 8px; letter-spacing: .1em; }
@@ -179,7 +194,6 @@ header p { color: #777d89; margin: 0; }
 .icy-guide-meta span { color: #606874; font-size: 8px; text-transform: uppercase; }
 .icy-guide-meta b { color: #8bcad9; font-size: 9px; }
 .wowhead-source.icy-source { border-color: #176b87; color: #68cbe8; background: #10232b; }
-.icyveins-module .wowhead-tier-items article > button small { width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .icy-note-panel > a { border-color: #1c657b; color: #72c9df; }
 
 @media (max-width: 1050px) {
@@ -215,11 +229,11 @@ header p { font-size: 15px; line-height: 1.6; }
 .source-pill > span:last-child, .model-note, .ranking-footnote,
 .wowhead-method-note { font-size: 13px; }
 .source-pill small, .rank-person small, .table-item small, .item-picker small,
-.selected-item-summary p, .wowhead-tier-head p, .wowhead-tier-items article > button small,
+.selected-item-summary p, .wowhead-tier-head p,
 .guide-tabs small, .icy-guide-meta b { font-size: 12px; }
 .segment-control button, .complete-guide-picker select, .guide-tabs b,
 .item-picker b, .class-cell b, .spec-cell b, .tier-specs article b,
-.wowhead-tier-items article > button b, .wowhead-audit-bar b,
+.editorial-card-heading > b, .wowhead-audit-bar b,
 .wowhead-audit-bar a, .guide-note p { font-size: 13px; }
 .ranking-head, .spec-table-head, .item-spec-head, .use-type,
 .evidence-chips span, .role-chip, .wowhead-source, .source-badge { font-size: 11px; }

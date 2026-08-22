@@ -1,10 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import ItemIcon from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
-import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
+import EditorialItemCard from '../components/EditorialItemCard.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
-import { localizedItemName, localizedWowheadUrl } from '../item-localization.js';
 import { usePersistentState } from '../use-persistent-state.js';
 import { showTechnicalMetadata } from '../build-mode.js';
 
@@ -16,7 +14,7 @@ export default function WowheadTierlists() {
   const [classId, setClassId] = usePersistentState('loot-wowhead-class', 'hunter');
   const [guideId, setGuideId] = usePersistentState('loot-wowhead-guide', 'hunter-beast-mastery');
   const [source, setSource] = usePersistentState('loot-wowhead-source', 'all');
-  const [selectedItemId, setSelectedItemId] = usePersistentState('loot-wowhead-item', null);
+  const [expandedCard, setExpandedCard] = useState(null);
   const [error, setError] = useState('');
   const previousGuideId = useRef(guideId);
 
@@ -49,13 +47,10 @@ export default function WowheadTierlists() {
     }));
   }, [guide, source]);
 
-  const visibleItems = visibleTiers.flatMap((tier) => tier.items);
-  const selectedItem = visibleItems.find((item) => item.itemId === selectedItemId) || visibleItems[0];
-
   useEffect(() => {
     if (previousGuideId.current !== guideId) {
       setSource('all');
-      setSelectedItemId(null);
+      setExpandedCard(null);
     }
     previousGuideId.current = guideId;
   }, [guideId]);
@@ -109,7 +104,7 @@ export default function WowheadTierlists() {
         <div className="panel-head wowhead-tier-head">
           <div><small>{t('guide.originalTierList')}</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p></div>
           <div className="segment-control wowhead-source-filter">
-            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setSelectedItemId(null); }}>{t({ all: 'common.all', raid: 'common.raid', dungeon: 'common.mythicPlus', delves: 'common.delves', crafting: 'common.crafting' }[entry])}</button>)}
+            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setExpandedCard(null); }}>{t({ all: 'common.all', raid: 'common.raid', dungeon: 'common.mythicPlus', delves: 'common.delves', crafting: 'common.crafting' }[entry])}</button>)}
           </div>
         </div>
 
@@ -118,32 +113,15 @@ export default function WowheadTierlists() {
             <section className={`wowhead-tier-row tier-source-${tierClass(tier.label)}`} key={tier.label}>
               <div className="wowhead-tier-label"><b>{tier.label}</b><span>{tier.items.length}</span></div>
               <div className="wowhead-tier-items">
-                {tier.items.length ? tier.items.map((item) => (
-                  <article key={`${item.itemId}-${item.displayOrder}`} className={`wowhead-clickable-item ${selectedItem?.itemId === item.itemId ? 'selected' : ''}`}>
-                    <a className="wowhead-item-card-link" href={localizedWowheadUrl(item, language)} target="_blank" rel="noreferrer" data-wowhead={`item=${item.itemId}`} onClick={() => setSelectedItemId(item.itemId)}>
-                      <ItemIcon item={item} />
-                      <span className="wowhead-item-copy">
-                        <ContentTypeBadge types={item.contentTypes} />
-                        <b>{localizedItemName(item, language)}</b>
-                        <small>Item {item.itemId}{item.guideNote ? ` · ${t('guide.editorialNote')}` : ''}</small>
-                      </span>
-                    </a>
-                  </article>
-                )) : <span className="empty-tier">{t('guide.emptyFilter')}</span>}
+                {tier.items.length ? tier.items.map((item) => {
+                  const cardKey = `${guide.id}:${tier.label}:${item.itemId}:${item.displayOrder}`;
+                  return <EditorialItemCard key={cardKey} item={item} expanded={expandedCard === cardKey} onToggle={() => setExpandedCard((current) => current === cardKey ? null : cardKey)} />;
+                }) : <span className="empty-tier">{t('guide.emptyFilter')}</span>}
               </div>
             </section>
           ))}
         </div>
       </section>
-
-      {selectedItem && (
-        <section className="panel wowhead-note-panel">
-          <ItemIcon item={selectedItem} tooltip />
-          <div><small>{t('common.selectedItem')}</small><h2>{localizedItemName(selectedItem, language)}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
-          <div className="guide-note"><small>{t('guide.authorNote')}</small><p>{selectedItem.guideNote || t('guide.noEditorialNote')}</p></div>
-          <a href={selectedItem.wowheadUrl} target="_blank" rel="noreferrer">{t('common.openWowhead')}</a>
-        </section>
-      )}
 
       <p className="wowhead-method-note">{t('guide.wowheadMethod')}</p>
     </div>
