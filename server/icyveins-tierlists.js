@@ -61,16 +61,16 @@ function iconSlug(source = '') {
   return path.basename(pathname).replace(/\.(?:jpe?g|png|webp)$/i, '');
 }
 
-function parseListItem(li, tier, displayOrder) {
-  const itemMatch = li.match(/data-wowhead="item=(\d+)(?:&amp;[^"]*)?"[^>]*>([\s\S]*?)<\/span>/i);
+function parseItemMarkup(markup, tier, displayOrder, noteMarkup = null) {
+  const itemMatch = markup.match(/data-wowhead="item=(\d+)(?:&amp;[^"]*)?"[^>]*>([\s\S]*?)<\/span>/i);
   if (!itemMatch) return null;
   const itemId = Number(itemMatch[1]);
-  const icon = li.match(/<img[^>]+class="spell_icon"[^>]+src="([^"]+)"/i)?.[1]
-    || li.match(/<img[^>]+src="([^"]+)"[^>]+class="spell_icon"/i)?.[1]
+  const icon = markup.match(/<img[^>]+class="spell_icon"[^>]+src="([^"]+)"/i)?.[1]
+    || markup.match(/<img[^>]+src="([^"]+)"[^>]+class="spell_icon"/i)?.[1]
     || '';
-  const quality = Number(li.match(/class="q(\d+)"/i)?.[1] || 0);
-  const outerEnd = li.lastIndexOf('</span></span>');
-  const noteMarkup = outerEnd >= 0 ? li.slice(outerEnd + '</span></span>'.length) : '';
+  const quality = Number(markup.match(/class="q(\d+)"/i)?.[1] || 0);
+  const outerEnd = markup.lastIndexOf('</span></span>');
+  const resolvedNoteMarkup = noteMarkup ?? (outerEnd >= 0 ? markup.slice(outerEnd + '</span></span>'.length) : '');
   return {
     itemId,
     name: stripHtml(itemMatch[2]),
@@ -79,10 +79,53 @@ function parseListItem(li, tier, displayOrder) {
     displayOrder,
     quality,
     contentTypes: [],
-    guideNote: stripHtml(noteMarkup),
+    guideNote: stripHtml(resolvedNoteMarkup),
     noteKey: '',
     wowheadUrl: `https://www.wowhead.com/item=${itemId}`,
   };
+}
+
+function parseRowItems(row, tier) {
+  const candidates = [];
+  const listRanges = [];
+  const listPattern = /<li\b[^>]*>([\s\S]*?)(?=<li\b|<\/ul>)/gi;
+  for (const listMatch of row.matchAll(listPattern)) {
+    const start = listMatch.index;
+    const end = start + listMatch[0].length;
+    listRanges.push({ start, end });
+    const detailsMatch = listMatch[1].match(/<details\b[^>]*class="[^"]*\blist-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/i);
+    if (detailsMatch) {
+      const details = detailsMatch[1];
+      const summaryMatch = details.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
+      if (!summaryMatch) continue;
+      const noteMarkup = details.slice((summaryMatch.index || 0) + summaryMatch[0].length);
+      candidates.push({ start, markup: summaryMatch[1], noteMarkup });
+    } else {
+      candidates.push({ start, markup: listMatch[1], noteMarkup: null });
+    }
+  }
+
+  const detailsPattern = /<details\b[^>]*class="[^"]*\blist-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/gi;
+  for (const detailsMatch of row.matchAll(detailsPattern)) {
+    if (listRanges.some((range) => detailsMatch.index >= range.start && detailsMatch.index < range.end)) continue;
+    const details = detailsMatch[1];
+    const summaryMatch = details.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
+    if (!summaryMatch) continue;
+    const noteMarkup = details.slice((summaryMatch.index || 0) + summaryMatch[0].length);
+    candidates.push({ start: detailsMatch.index, markup: summaryMatch[1], noteMarkup });
+  }
+
+  const parsed = candidates
+    .sort((left, right) => left.start - right.start)
+    .map((candidate, index) => ({
+      candidate,
+      item: parseItemMarkup(candidate.markup, tier, index + 1, candidate.noteMarkup),
+    }));
+  const unresolved = parsed.filter(({ candidate, item }) => !item && /data-wowhead="item=\d+/i.test(candidate.markup));
+  if (unresolved.length) throw new Error(`No se pudieron interpretar ${unresolved.length} entradas de la tier ${tier}`);
+  return parsed
+    .flatMap(({ item }) => item ? [item] : [])
+    .map((item, index) => ({ ...item, displayOrder: index + 1 }));
 }
 
 export function parseIcyVeinsGuideHtml(html, guide) {
@@ -93,10 +136,9 @@ export function parseIcyVeinsGuideHtml(html, guide) {
     const tierMatch = row.match(/<strong>\s*([SABCDF](?:\+)?)\s+Tier\s*<\/strong>/i);
     if (!tierMatch) continue;
     const label = tierMatch[1].toUpperCase();
-    const items = [];
-    for (const itemMatch of row.matchAll(/<li[^>]*>([\s\S]*?)<\/li>/gi)) {
-      const item = parseListItem(itemMatch[1], label, items.length + 1);
-      if (item) items.push(item);
+    const items = parseRowItems(row, label);
+    if (!items.length && /data-wowhead="item=\d+/i.test(row)) {
+      throw new Error(`La tier ${label} contiene items que el parser no reconoció`);
     }
     if (items.length) tiers.push({ label, items });
   }

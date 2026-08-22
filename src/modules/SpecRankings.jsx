@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ItemIcon, { WowheadLink } from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
+import SpecGuideMenu from '../components/SpecGuideMenu.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { localizedItemName } from '../item-localization.js';
@@ -107,7 +108,7 @@ export default function SpecRankings() {
                   <article key={`${entry.classId}-${entry.specId}`}>
                     <span className="table-rank">{String(entry.rank || index + 1).padStart(2, '0')}</span>
                     <div className="class-cell"><ClassSpecIcon classId={entry.classId} label={entry.className} /><b>{entry.className}</b></div>
-                    <div className="spec-cell"><ClassSpecIcon classId={entry.classId} specId={entry.specId} label={entry.specName} kind="spec" /><div><b>{entry.specName}</b><small>{sourceEvidence(entry)} · {t('rank.evidenceCoverage', { value: entry.confidence })}</small></div></div>
+                    <div className="spec-cell"><SpecGuideMenu classId={entry.classId} specId={entry.specId} role={entry.role} label={entry.specName} /><div><b>{entry.specName}</b><small>{sourceEvidence(entry)} · {t('rank.evidenceCoverage', { value: entry.confidence })}</small></div></div>
                     <span className={`role-chip role-${entry.role}`}>{entry.role === 'support' ? 'Support' : entry.role}</span>
                     <div className="relative-score" title={t('rank.evidenceCoverage', { value: entry.confidence })}><div><i style={{ width: `${entry.score}%` }} /></div><strong>{entry.score}</strong></div>
                     <span className={`tier tier-${entry.tier.toLowerCase()}`}>{entry.tier}</span>
@@ -117,7 +118,7 @@ export default function SpecRankings() {
             </> : <div className="tier-board">
               {['S', 'A', 'B', 'C'].map((tier) => {
                 const tierEntries = visibleRankings.filter((entry) => entry.tier === tier);
-                return <section className={`tier-row tier-row-${tier.toLowerCase()}`} key={tier}><div className="tier-row-label"><b>{tier}</b><span>{tierEntries.length}</span></div><div className="tier-specs">{tierEntries.length ? tierEntries.map((entry) => <article key={`${entry.classId}-${entry.specId}`}><ClassSpecIcon classId={entry.classId} specId={entry.specId} label={entry.specName} kind="spec" /><div><b>{entry.specName}</b><small>{sourceEvidence(entry)} · {entry.confidence}%</small></div><strong>{entry.score}</strong></article>) : <span className="empty-tier">{t('rank.emptySpecs')}</span>}</div></section>;
+                return <section className={`tier-row tier-row-${tier.toLowerCase()}`} key={tier}><div className="tier-row-label"><b>{tier}</b><span>{tierEntries.length}</span></div><div className="tier-specs">{tierEntries.length ? tierEntries.map((entry) => <article key={`${entry.classId}-${entry.specId}`}><SpecGuideMenu classId={entry.classId} specId={entry.specId} role={entry.role} label={entry.specName} /><div><b>{entry.specName}</b><small>{sourceEvidence(entry)} · {entry.confidence}%</small></div><strong>{entry.score}</strong></article>) : <span className="empty-tier">{t('rank.emptySpecs')}</span>}</div></section>;
               })}
             </div>}
           </section>

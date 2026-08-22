@@ -4,7 +4,7 @@ import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
-import { localizedItemName } from '../item-localization.js';
+import { localizedItemName, localizedWowheadUrl } from '../item-localization.js';
 import { usePersistentState } from '../use-persistent-state.js';
 import { showTechnicalMetadata } from '../build-mode.js';
 
@@ -119,13 +119,15 @@ export default function WowheadTierlists() {
               <div className="wowhead-tier-label"><b>{tier.label}</b><span>{tier.items.length}</span></div>
               <div className="wowhead-tier-items">
                 {tier.items.length ? tier.items.map((item) => (
-                  <article key={`${item.itemId}-${item.displayOrder}`} className={selectedItem?.itemId === item.itemId ? 'selected' : ''}>
-                    <ItemIcon item={item} tooltip />
-                    <button onClick={() => setSelectedItemId(item.itemId)}>
-                      <ContentTypeBadge types={item.contentTypes} />
-                      <b>{localizedItemName(item, language)}</b>
-                      <small>Item {item.itemId}{item.guideNote ? ` · ${t('guide.editorialNote')}` : ''}</small>
-                    </button>
+                  <article key={`${item.itemId}-${item.displayOrder}`} className={`wowhead-clickable-item ${selectedItem?.itemId === item.itemId ? 'selected' : ''}`}>
+                    <a className="wowhead-item-card-link" href={localizedWowheadUrl(item, language)} target="_blank" rel="noreferrer" data-wowhead={`item=${item.itemId}`} onClick={() => setSelectedItemId(item.itemId)}>
+                      <ItemIcon item={item} />
+                      <span className="wowhead-item-copy">
+                        <ContentTypeBadge types={item.contentTypes} />
+                        <b>{localizedItemName(item, language)}</b>
+                        <small>Item {item.itemId}{item.guideNote ? ` · ${t('guide.editorialNote')}` : ''}</small>
+                      </span>
+                    </a>
                   </article>
                 )) : <span className="empty-tier">{t('guide.emptyFilter')}</span>}
               </div>

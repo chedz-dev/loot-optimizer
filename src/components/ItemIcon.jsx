@@ -21,6 +21,8 @@ export default function ItemIcon({ item, size = 'normal', tooltip = false }) {
     <a
       className="item-tooltip-anchor"
       href={localizedWowheadUrl(item, language)}
+      target="_blank"
+      rel="noreferrer"
       data-wowhead={`item=${item.itemId}`}
       aria-label={t('icon.tooltip', { name })}
       title={t('icon.open', { name })}

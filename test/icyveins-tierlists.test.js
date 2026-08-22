@@ -48,6 +48,49 @@ test('parsea tier, item, icon y comentario desde la tabla HTML de Icy Veins', ()
   });
 });
 
+test('parsea items expandibles con details sin capturar items mencionados en la explicación', () => {
+  const unholyGuide = {
+    ...guide,
+    id: 'death-knight-unholy',
+    classId: 'death-knight',
+    className: 'Death Knight',
+    specId: 'unholy',
+    specName: 'Unholy',
+  };
+  const detailsFixture = `
+  <title>Unholy Death Knight DPS Gear and Best in Slot - 12.1 - World of Warcraft - Icy Veins</title>
+  <details class="trinket-dropdown"><summary>Click for Unholy Death Knight Trinket Rankings</summary>
+  <table><tr><th>Ranking</th><th>Trinkets</th></tr><tr><td><strong>S Tier</strong></td><td><ul>
+  <details class="list-item"><summary><span class="spell_icon_span"><img class="spell_icon" src="//static.icy-veins.com/images/wow/large_icons/inv_121_trinket_raid_ulatek_trolltablet.jpg"> <span data-wowhead="item=270173" class="q4">Zul'jin's Guillotine Technique</span></span> - <em>Click for Details</em></summary>
+  <span>Best passive when combined with <span data-wowhead="item=268213" class="q4">Maze-roa, Warlord's Fury</span>.</span></details>
+  </ul></td></tr></table></details>`;
+  const result = parseIcyVeinsGuideHtml(detailsFixture, unholyGuide);
+  assert.equal(result.itemCount, 1);
+  assert.equal(result.tiers[0].label, 'S');
+  assert.equal(result.tiers[0].items[0].itemId, 270173);
+  assert.equal(result.tiers[0].items[0].name, "Zul'jin's Guillotine Technique");
+  assert.match(result.tiers[0].items[0].guideNote, /Best passive/);
+  assert.doesNotMatch(result.tiers[0].items[0].guideNote, /Click for Details/);
+});
+
+test('recupera todos los items cuando Icy Veins omite cierres de li', () => {
+  const malformedFixture = fixture.replace(`<li><span class="spell_icon_span"><img class="spell_icon" src="//static.icy-veins.com/images/wow/large_icons/inv_alchemy_90_flask_red.jpg" alt="Freightrunner's Flask Icon" /> <span data-wowhead="item=250215" class="q3">Freightrunner's Flask</span></span> &mdash; Best on-use Trinket</li>`, `
+  <li><details class="list-item"><summary><span data-wowhead="item=270602" class="q4">Venomous Gladiator's Badge of Ferocity</span></summary><span>Explanation</span></details>
+  <li><span data-wowhead="item=273796" class="q4">Vile Vial of Volatile Venom</span></li>
+  <li><span data-wowhead="item=250214" class="q3">Lightspire Core</span>`);
+  const result = parseIcyVeinsGuideHtml(malformedFixture, guide);
+  assert.deepEqual(result.tiers[0].items.map((item) => item.itemId), [270602, 273796, 250214]);
+  assert.deepEqual(result.tiers[0].items.map((item) => item.displayOrder), [1, 2, 3]);
+});
+
+test('rechaza una tier con items en un contenedor desconocido en lugar de guardar datos parciales', () => {
+  const unsupportedFixture = fixture.replace(
+    /<li><span class="spell_icon_span">[\s\S]*?<\/li>/,
+    '<div class="new-item-layout"><span data-wowhead="item=250215" class="q3">Freightrunner\'s Flask</span></div>',
+  );
+  assert.throws(() => parseIcyVeinsGuideHtml(unsupportedFixture, guide), /tier S contiene items que el parser no reconoció/);
+});
+
 test('persiste y reconstruye snapshots editoriales en JSON', () => {
   const store = createEditorialStore();
   const parsed = parseIcyVeinsGuideHtml(fixture, guide);
