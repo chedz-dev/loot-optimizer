@@ -4,19 +4,20 @@ import WowheadTierlists from './modules/WowheadTierlists.jsx';
 import IcyVeinsTierlists from './modules/IcyVeinsTierlists.jsx';
 import ItemIcon from './components/ItemIcon.jsx';
 import { dataFetch } from './data-client.js';
+import { useI18n } from './i18n.jsx';
 
-const sourceLabels = {
-  ready: 'Conectada',
-  dataset: 'Dataset',
-  'credentials-required': 'Requiere acceso',
-  'reference-only': 'Referencia',
+const sourceLabelKeys = {
+  ready: 'source.connected',
+  dataset: 'source.dataset',
+  'credentials-required': 'source.credentials',
+  'reference-only': 'source.reference',
 };
 
-function SourcePill({ source }) {
+function SourcePill({ source, t }) {
   return (
     <a className={`source-pill ${source.status}`} href={source.url} target="_blank" rel="noreferrer" title={source.detail}>
       <span className="source-mark">{source.name.slice(0, 2).toUpperCase()}</span>
-      <span><b>{source.name}</b><small>{sourceLabels[source.status]}</small></span>
+      <span><b>{source.name}</b><small>{t(sourceLabelKeys[source.status])}</small></span>
     </a>
   );
 }
@@ -32,6 +33,7 @@ function ScoreBar({ label, value, tint = 'gold' }) {
 }
 
 function App() {
+  const { language, setLanguage, t } = useI18n();
   const [view, setView] = useState('rankings');
   const [data, setData] = useState(null);
   const [sources, setSources] = useState([]);
@@ -85,29 +87,37 @@ function App() {
     ? current.filter((item) => item !== id)
     : [...current, id]);
 
-  if (!data) return <div className="loading">Cargando Loot Council...</div>;
+  if (!data) return <div className="loading">{t('loading.app')}</div>;
   const currentTrinket = data.trinkets.find((item) => item.id === selected);
 
   return (
     <div className="app-shell">
       <aside>
         <div className="brand"><span className="brand-rune">LC</span><div><b>Loot Council</b><small>Optimizer</small></div></div>
+        <div className="language-switcher" role="group" aria-label={t('language.label')}>
+          <span>{t('language.label')}</span>
+          <div><button className={language === 'es' ? 'active' : ''} onClick={() => setLanguage('es')}>ES</button><button className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button></div>
+        </div>
         <nav>
-          <button className="disabled" disabled title="Módulo disponible próximamente"><span>01</span> Optimización</button>
-          <button className={view === 'rankings' ? 'active' : ''} onClick={() => setView('rankings')}><span>02</span> Rankings</button>
-          <button className={view === 'wowhead' ? 'active' : ''} onClick={() => setView('wowhead')}><span>03</span> Tierlist Wowhead</button>
-          <button className={view === 'icyveins' ? 'active' : ''} onClick={() => setView('icyveins')}><span>04</span> Tierlist Icy Veins</button>
-          <button className="disabled" disabled title="Módulo disponible próximamente"><span>05</span> Roster</button>
-          <button className="disabled" disabled title="Módulo disponible próximamente"><span>06</span> Historial</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>01</span> {t('nav.optimization')}</button>
+          <button className={view === 'rankings' ? 'active' : ''} onClick={() => setView('rankings')}><span>02</span> {t('nav.rankings')}</button>
+          <button className={view === 'wowhead' ? 'active' : ''} onClick={() => setView('wowhead')}><span>03</span> {t('nav.wowhead')}</button>
+          <button className={view === 'icyveins' ? 'active' : ''} onClick={() => setView('icyveins')}><span>04</span> {t('nav.icyveins')}</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>05</span> {t('nav.roster')}</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>06</span> {t('nav.history')}</button>
         </nav>
         <div className="season-card">
-          <small>Temporada activa</small>
+          <small>{t('season.active')}</small>
           <strong>Midnight S2</strong>
-          <p>Modelo para trinkets</p>
+          <p>{t('season.model')}</p>
         </div>
       </aside>
 
       <main>
+        <div className="language-switcher mobile-language-switcher" role="group" aria-label={t('language.label')}>
+          <span>{t('language.label')}</span>
+          <div><button className={language === 'es' ? 'active' : ''} onClick={() => setLanguage('es')}>ES</button><button className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button></div>
+        </div>
         {view === 'rankings' ? <SpecRankings /> : view === 'wowhead' ? <WowheadTierlists /> : view === 'icyveins' ? <IcyVeinsTierlists /> : <>
         <header>
           <div><p className="eyebrow">DECISIÓN BASADA EN DATOS</p><h1>Optimización de trinkets</h1><p>Cruza simulaciones, rendimiento real, guías y necesidad de mejora.</p></div>
@@ -116,12 +126,12 @@ function App() {
 
         <section className="source-strip">
           <div><small>FUENTES</small><b>{sources.filter((source) => ['ready', 'dataset'].includes(source.status)).length} disponibles</b></div>
-          {sources.map((source) => <SourcePill key={source.id} source={source} />)}
+          {sources.map((source) => <SourcePill key={source.id} source={source} t={t} />)}
         </section>
 
         <div className="workspace-grid">
           <section className="panel loot-panel">
-            <div className="panel-head"><div><small>PASO 1</small><h2>Loot disponible</h2></div><span className="count">{drops.length} drops</span></div>
+            <div className="panel-head"><div><h2>Loot disponible</h2></div><span className="count">{drops.length} drops</span></div>
             <div className="trinket-list">
               {data.trinkets.map((trinket) => (
                 <button key={trinket.id} className={`trinket ${selected === trinket.id ? 'selected' : ''}`} onClick={() => setSelected(trinket.id)}>
@@ -137,7 +147,7 @@ function App() {
           </section>
 
           <section className="panel ranking-panel">
-            <div className="panel-head"><div><small>PASO 2</small><h2>Ranking para {currentTrinket.name}</h2></div><span className="fresh">Muestra de UI</span></div>
+            <div className="panel-head"><div><h2>Ranking para {currentTrinket.name}</h2></div><span className="fresh">Muestra de UI</span></div>
             <div className="ranking-head"><span>Jugador</span><span>Señales</span><span>Score</span></div>
             <div className="ranking-list">
               {ranking.map((entry, index) => (

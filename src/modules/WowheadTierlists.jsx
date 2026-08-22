@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
 import ItemIcon from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
-import ContentTypeBadge, { CONTENT_TYPE_LABELS } from '../components/ContentTypeBadge.jsx';
+import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
 import { dataFetch } from '../data-client.js';
+import { useI18n } from '../i18n.jsx';
 
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
 export default function WowheadTierlists() {
+  const { language, t } = useI18n();
   const [payload, setPayload] = useState(null);
   const [classId, setClassId] = useState('hunter');
   const [guideId, setGuideId] = useState('hunter-beast-mastery');
@@ -56,23 +58,23 @@ export default function WowheadTierlists() {
   }, [guide, source]);
 
   if (error) {
-    return <div className="spec-module"><header className="rankings-hero"><div><p className="eyebrow">WOWHEAD GUIDE DATA</p><h1>Tierlist Wowhead Trinkets</h1></div></header><div className="error-inline">{error}</div></div>;
+    return <div className="spec-module"><header className="rankings-hero"><div><p className="eyebrow">WOWHEAD</p><h1>{t('guide.wowheadTitle')}</h1></div></header><div className="error-inline">{error}</div></div>;
   }
 
-  if (!payload || !guide) return <div className="module-loading">Parseando las guías de Wowhead...</div>;
+  if (!payload || !guide) return <div className="module-loading">{t('guide.wowheadLoading')}</div>;
 
   return (
     <div className="spec-module wowhead-module">
       <header className="rankings-hero">
-        <div><p className="eyebrow">DATOS EDITORIALES TRAZABLES</p><h1>Tierlist Wowhead Trinkets</h1><p>Reconstrucción automática del bloque Trinket Tier List publicado en cada guía.</p></div>
-        <span className="live-parser-badge">JSON CANÓNICO · CACHE {payload.cacheHours}H</span>
+        <div><p className="eyebrow">{t('guide.eyebrow')}</p><h1>{t('guide.wowheadTitle')}</h1><p>{t('guide.wowheadSubtitle')}</p></div>
+        <span className="live-parser-badge">{t('guide.updatedHourly', { hours: payload.cacheHours })}</span>
       </header>
 
       <section className="panel wowhead-guide-selector">
         <div className="selector-title">
-          <div><small>GUÍA</small><h2>Selecciona una clase y especialización</h2></div>
+          <div><small>{t('guide.guide')}</small><h2>{t('guide.select')}</h2></div>
           <div className="complete-guide-picker">
-            <label><span>CLASE</span><select value={classId} onChange={(event) => { const nextClass = event.target.value; setClassId(nextClass); setGuideId(payload.guides.find((entry) => entry.classId === nextClass)?.id || ''); }}>
+            <label><span>{t('common.class')}</span><select value={classId} onChange={(event) => { const nextClass = event.target.value; setClassId(nextClass); setGuideId(payload.guides.find((entry) => entry.classId === nextClass)?.id || ''); }}>
               {classes.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}
             </select></label>
             <div className="guide-tabs">
@@ -86,19 +88,19 @@ export default function WowheadTierlists() {
           </div>
         </div>
         <div className="wowhead-audit-bar">
-          <div><span>Fuente</span><a href={guide.url} target="_blank" rel="noreferrer">Abrir guía original</a></div>
-          <div><span>Cobertura</span><b>{payload.guideCount}/{payload.guideCount} specs</b></div>
-          <div><span>Items parseados</span><b>{guide.itemCount}</b></div>
-          <div><span>Tiers detectados</span><b>{guide.tierCount}</b></div>
-          <div><span>Snapshot JSON</span><b>#{guide.snapshotId} · {new Date(guide.fetchedAt).toLocaleString('es-MX', { dateStyle: 'short', timeStyle: 'short' })}</b></div>
+          <div><span>{t('common.source')}</span><a href={guide.url} target="_blank" rel="noreferrer">{t('guide.original')}</a></div>
+          <div><span>{t('common.coverage')}</span><b>{payload.guideCount}/{payload.guideCount} specs</b></div>
+          <div><span>{t('guide.parsedItems')}</span><b>{guide.itemCount}</b></div>
+          <div><span>{t('guide.detectedTiers')}</span><b>{guide.tierCount}</b></div>
+          <div><span>{t('guide.snapshot')}</span><b>#{guide.snapshotId} · {new Date(guide.fetchedAt).toLocaleString(language === 'es' ? 'es-MX' : 'en-US', { dateStyle: 'short', timeStyle: 'short' })}</b></div>
         </div>
       </section>
 
       <section className="panel wowhead-tier-panel">
         <div className="panel-head wowhead-tier-head">
-          <div><small>TIER LIST ORIGINAL</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p></div>
+          <div><small>{t('guide.originalTierList')}</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p></div>
           <div className="segment-control wowhead-source-filter">
-            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setSelectedItemId(null); }}>{CONTENT_TYPE_LABELS[entry]}</button>)}
+            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setSelectedItemId(null); }}>{t({ all: 'common.all', raid: 'common.raid', dungeon: 'common.mythicPlus', delves: 'common.delves', crafting: 'common.crafting' }[entry])}</button>)}
           </div>
         </div>
 
@@ -113,10 +115,10 @@ export default function WowheadTierlists() {
                     <button onClick={() => setSelectedItemId(item.itemId)}>
                       <ContentTypeBadge types={item.contentTypes} />
                       <b>{item.name}</b>
-                      <small>Item {item.itemId}{item.guideNote ? ' · Nota editorial' : ''}</small>
+                      <small>Item {item.itemId}{item.guideNote ? ` · ${t('guide.editorialNote')}` : ''}</small>
                     </button>
                   </article>
-                )) : <span className="empty-tier">Sin items para este filtro</span>}
+                )) : <span className="empty-tier">{t('guide.emptyFilter')}</span>}
               </div>
             </section>
           ))}
@@ -126,13 +128,13 @@ export default function WowheadTierlists() {
       {selectedItem && (
         <section className="panel wowhead-note-panel">
           <ItemIcon item={selectedItem} tooltip />
-          <div><small>ITEM SELECCIONADO</small><h2>{selectedItem.name}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
-          <div className="guide-note"><small>NOTA DEL AUTOR DE LA GUÍA</small><p>{selectedItem.guideNote || 'Este item no tiene una nota editorial asociada en la tier list.'}</p></div>
-          <a href={selectedItem.wowheadUrl} target="_blank" rel="noreferrer">Ver item en Wowhead</a>
+          <div><small>{t('common.selectedItem')}</small><h2>{selectedItem.name}</h2><ContentTypeBadge types={selectedItem.contentTypes} /></div>
+          <div className="guide-note"><small>{t('guide.authorNote')}</small><p>{selectedItem.guideNote || t('guide.noEditorialNote')}</p></div>
+          <a href={selectedItem.wowheadUrl} target="_blank" rel="noreferrer">{t('common.openWowhead')}</a>
         </section>
       )}
 
-      <p className="wowhead-method-note">La letra del tier y el orden de los items se conservan tal como aparecen en el markup de Wowhead. El orden horizontal se muestra como orden visual, no como una diferencia de poder inferida.</p>
+      <p className="wowhead-method-note">{t('guide.wowheadMethod')}</p>
     </div>
   );
 }

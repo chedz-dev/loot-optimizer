@@ -42,11 +42,13 @@ const iconUrl = (classId, specId) => {
 };
 
 export default function ClassSpecIcon({ classId, specId, label, kind = 'class' }) {
+  const { t } = useI18n();
   const isSpec = kind === 'spec';
   const fallback = isSpec ? iconUrl(classId) : FALLBACK_ICON;
   return (
     <span className={`wow-identity-icon ${isSpec ? 'spec-identity-icon' : 'class-identity-icon'}`} title={label}>
-      <img src={iconUrl(classId, isSpec ? specId : undefined)} alt={`Ícono de ${label}`} onError={(event) => { event.currentTarget.src = fallback; }} />
+      <img src={iconUrl(classId, isSpec ? specId : undefined)} alt={t('icon.alt', { name: label })} onError={(event) => { event.currentTarget.src = fallback; }} />
     </span>
   );
 }
+import { useI18n } from '../i18n.jsx';
