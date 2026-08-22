@@ -1,6 +1,7 @@
 const clamp = (value, minimum = 0, maximum = 100) => Math.max(minimum, Math.min(maximum, value));
 
 export const TIER_SCORES = Object.freeze({
+  'S+': 100,
   S: 100,
   'A+': 95,
   A: 90,
@@ -8,6 +9,7 @@ export const TIER_SCORES = Object.freeze({
   C: 60,
   D: 45,
   F: 30,
+  G: 15,
 });
 
 export const RANKING_SOURCE_REGISTRY = Object.freeze({
@@ -42,7 +44,13 @@ export const RANKING_SOURCE_REGISTRY = Object.freeze({
 });
 
 const signalNormalizers = {
-  'editorial-tier': (signal) => TIER_SCORES[String(signal.textValue || '').toUpperCase()],
+  'editorial-tier': (signal) => {
+    const tier = String(signal.textValue || '').trim().toUpperCase();
+    if (!Object.hasOwn(TIER_SCORES, tier)) {
+      throw new Error(`Tier editorial no soportado: ${tier || '(vacío)'}`);
+    }
+    return TIER_SCORES[tier];
+  },
   'normalized-score': (signal) => Number.isFinite(signal.numericValue) ? clamp(signal.numericValue) : null,
   percentile: (signal) => Number.isFinite(signal.numericValue) ? clamp(signal.numericValue) : null,
 };

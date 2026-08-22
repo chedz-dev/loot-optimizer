@@ -27,6 +27,33 @@ test('pondera Wowhead e Icy Veins 50/50 usando la escala de tiers', () => {
   assert.equal(result.rankings[0].sourceScores.icyveins.weight, 0.5);
 });
 
+test('normaliza S+ de Wowhead como tier S y no como una fuente ausente', () => {
+  const result = rankItemFromSignals({
+    classSpecs: classes,
+    signals: [signal('wowhead', 'S+'), signal('icyveins', 'S')],
+    content: 'raid',
+  });
+  assert.equal(result.rankings[0].score, 100);
+  assert.equal(result.rankings[0].tier, 'S');
+  assert.equal(result.rankings[0].confidence, 100);
+  assert.equal(result.rankings[0].sourceScores.wowhead.status, 'observed');
+  assert.equal(result.rankings[0].sourceTiers.wowhead, 'S+');
+  assert.equal(result.rankings[0].sourceTiers.icyveins, 'S');
+});
+
+test('normaliza la tier G publicada por Wowhead', () => {
+  const result = rankItemFromSignals({ classSpecs: classes, signals: [signal('wowhead', 'G')], content: 'raid' });
+  assert.equal(result.rankings[0].sourceScores.wowhead.score, 15);
+  assert.equal(result.rankings[0].sourceScores.wowhead.status, 'observed');
+});
+
+test('rechaza una tier editorial desconocida en lugar de degradarla silenciosamente a NR', () => {
+  assert.throws(
+    () => rankItemFromSignals({ classSpecs: classes, signals: [signal('wowhead', 'Z')], content: 'raid' }),
+    /Tier editorial no soportado: Z/,
+  );
+});
+
 test('marca como NR una fuente que no rankea el item y reduce cobertura', () => {
   const result = rankItemFromSignals({ classSpecs: classes, signals: [signal('wowhead', 'S')], content: 'raid' });
   assert.equal(result.rankings[0].score, 68);

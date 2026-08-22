@@ -93,7 +93,7 @@ export default function SpecRankings() {
 
           <section className="panel engine-summary">
             <div><small>{t('rank.activeSources')}</small><b>{result.metadata.sources.map((source) => `${source.name} ${Math.round(source.weight * 100)}%`).join(' · ')}</b></div>
-            <div><small>{t('rank.editorialScale')}</small><b>S 100 · A+ 95 · A 90 · B 75 · C 60 · D 45 · F 30</b></div>
+            <div><small>{t('rank.editorialScale')}</small><b>S+ 100 · S 100 · A+ 95 · A 90 · B 75 · C 60 · D 45 · F 30 · G 15</b></div>
             <div><small>{t('common.coverage')}</small><b>{t('rank.fullCoverage')}</b></div>
             <div><small>{t('rank.eligibility')}</small><b>{t('rank.visible', { visible: result.metadata.eligibleSpecs, excluded: result.metadata.excludedSpecs })}</b></div>
           </section>
