@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   base: process.env.VITE_BASE_PATH || '/',
+  define: {
+    __DATA_VERSION__: JSON.stringify(process.env.GITHUB_SHA || Date.now().toString()),
+  },
   plugins: [react()],
   server: {
     port: 5173,

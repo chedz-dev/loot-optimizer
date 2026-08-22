@@ -19,6 +19,5 @@ export function dataFetch(input, options) {
   }
   const path = staticPath(input);
   if (!path) return Promise.reject(new Error(`No existe una vista JSON estática para ${input}`));
-  return fetch(`${staticBase}${path}`);
+  return fetch(`${staticBase}${path}?v=${encodeURIComponent(__DATA_VERSION__)}`);
 }
-
