@@ -4,6 +4,7 @@ import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { localizedItemName } from '../item-localization.js';
+import { usePersistentState } from '../use-persistent-state.js';
 
 const sourceAbbreviations = { wowhead: 'WH', icyveins: 'IV', warcraftlogs: 'WCL', bloodmallet: 'BM' };
 
@@ -14,11 +15,11 @@ const sourceEvidence = (entry) => Object.values(entry.sourceScores || {}).map((s
 export default function SpecRankings() {
   const { language, t } = useI18n();
   const [items, setItems] = useState([]);
-  const [itemId, setItemId] = useState('gebbo');
-  const [content, setContent] = useState('all');
-  const [search, setSearch] = useState('');
-  const [role, setRole] = useState('all');
-  const [rankingView, setRankingView] = useState('list');
+  const [itemId, setItemId] = usePersistentState('loot-rankings-item', 'gebbo');
+  const [content, setContent] = usePersistentState('loot-rankings-content', 'all');
+  const [search, setSearch] = usePersistentState('loot-rankings-search', '');
+  const [role, setRole] = usePersistentState('loot-rankings-role', 'all');
+  const [rankingView, setRankingView] = usePersistentState('loot-rankings-view', 'list');
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');

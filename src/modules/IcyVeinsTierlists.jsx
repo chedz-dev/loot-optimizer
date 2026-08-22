@@ -1,20 +1,22 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ItemIcon from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { localizedItemName } from '../item-localization.js';
+import { usePersistentState } from '../use-persistent-state.js';
 
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
 export default function IcyVeinsTierlists() {
   const { language, t } = useI18n();
   const [payload, setPayload] = useState(null);
-  const [classId, setClassId] = useState('hunter');
-  const [guideId, setGuideId] = useState('hunter-beast-mastery');
-  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [classId, setClassId] = usePersistentState('loot-icyveins-class', 'hunter');
+  const [guideId, setGuideId] = usePersistentState('loot-icyveins-guide', 'hunter-beast-mastery');
+  const [selectedItemId, setSelectedItemId] = usePersistentState('loot-icyveins-item', null);
   const [error, setError] = useState('');
+  const previousGuideId = useRef(guideId);
 
   useEffect(() => {
     dataFetch('/api/icyveins/tierlists').then(async (response) => {
@@ -34,7 +36,10 @@ export default function IcyVeinsTierlists() {
   const items = guide?.tiers.flatMap((tier) => tier.items) || [];
   const selectedItem = items.find((item) => item.itemId === selectedItemId) || items[0];
 
-  useEffect(() => setSelectedItemId(null), [guideId]);
+  useEffect(() => {
+    if (previousGuideId.current !== guideId) setSelectedItemId(null);
+    previousGuideId.current = guideId;
+  }, [guideId]);
   useEffect(() => { window.$WowheadPower?.refreshLinks?.(); }, [guide]);
 
   if (error) {

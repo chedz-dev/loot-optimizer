@@ -5,6 +5,7 @@ import IcyVeinsTierlists from './modules/IcyVeinsTierlists.jsx';
 import ItemIcon from './components/ItemIcon.jsx';
 import { dataFetch } from './data-client.js';
 import { useI18n } from './i18n.jsx';
+import { usePersistentState } from './use-persistent-state.js';
 
 const sourceLabelKeys = {
   ready: 'source.connected',
@@ -34,7 +35,7 @@ function ScoreBar({ label, value, tint = 'gold' }) {
 
 function App() {
   const { language, setLanguage, t } = useI18n();
-  const [view, setView] = useState('rankings');
+  const [view, setView] = usePersistentState('loot-view', 'rankings');
   const [data, setData] = useState(null);
   const [sources, setSources] = useState([]);
   const [selected, setSelected] = useState('gebbo');
@@ -118,7 +119,10 @@ function App() {
           <span>{t('language.label')}</span>
           <div><button className={language === 'es' ? 'active' : ''} onClick={() => setLanguage('es')}>ES</button><button className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button></div>
         </div>
-        {view === 'rankings' ? <SpecRankings /> : view === 'wowhead' ? <WowheadTierlists /> : view === 'icyveins' ? <IcyVeinsTierlists /> : <>
+        <div className="module-view" hidden={view !== 'rankings'}><SpecRankings /></div>
+        <div className="module-view" hidden={view !== 'wowhead'}><WowheadTierlists /></div>
+        <div className="module-view" hidden={view !== 'icyveins'}><IcyVeinsTierlists /></div>
+        {!['rankings', 'wowhead', 'icyveins'].includes(view) && <>
         <header>
           <div><p className="eyebrow">DECISIÓN BASADA EN DATOS</p><h1>Optimización de trinkets</h1><p>Cruza simulaciones, rendimiento real, guías y necesidad de mejora.</p></div>
           <button className="primary" onClick={optimize} disabled={!drops.length || busy}>{busy ? 'Calculando...' : 'Optimizar asignación'}</button>

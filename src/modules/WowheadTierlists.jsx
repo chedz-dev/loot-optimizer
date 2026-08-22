@@ -1,21 +1,23 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import ItemIcon from '../components/ItemIcon.jsx';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import ContentTypeBadge from '../components/ContentTypeBadge.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { localizedItemName } from '../item-localization.js';
+import { usePersistentState } from '../use-persistent-state.js';
 
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
 export default function WowheadTierlists() {
   const { language, t } = useI18n();
   const [payload, setPayload] = useState(null);
-  const [classId, setClassId] = useState('hunter');
-  const [guideId, setGuideId] = useState('hunter-beast-mastery');
-  const [source, setSource] = useState('all');
-  const [selectedItemId, setSelectedItemId] = useState(null);
+  const [classId, setClassId] = usePersistentState('loot-wowhead-class', 'hunter');
+  const [guideId, setGuideId] = usePersistentState('loot-wowhead-guide', 'hunter-beast-mastery');
+  const [source, setSource] = usePersistentState('loot-wowhead-source', 'all');
+  const [selectedItemId, setSelectedItemId] = usePersistentState('loot-wowhead-item', null);
   const [error, setError] = useState('');
+  const previousGuideId = useRef(guideId);
 
   useEffect(() => {
     dataFetch('/api/wowhead/tierlists').then(async (response) => {
@@ -50,8 +52,11 @@ export default function WowheadTierlists() {
   const selectedItem = visibleItems.find((item) => item.itemId === selectedItemId) || visibleItems[0];
 
   useEffect(() => {
-    setSource('all');
-    setSelectedItemId(null);
+    if (previousGuideId.current !== guideId) {
+      setSource('all');
+      setSelectedItemId(null);
+    }
+    previousGuideId.current = guideId;
   }, [guideId]);
 
   useEffect(() => {
