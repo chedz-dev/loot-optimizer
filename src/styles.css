@@ -161,6 +161,7 @@ button.editorial-card-body { cursor: pointer; }
 button.editorial-card-body:focus-visible { border-radius: 3px; outline: 2px solid #69758a; outline-offset: 3px; }
 .editorial-card-heading { min-width: 0; display: grid; justify-items: start; gap: 4px; }
 .editorial-card-badges { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+.editorial-origin-inline { max-width: 170px; overflow: hidden; color: #929aa7; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .editorial-season-badge { padding: 2px 5px; border: 1px solid #77642d; border-radius: 3px; color: #e6c867; background: #2b2511; font-size: 11px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
 .editorial-card-heading > b { width: 100%; overflow: hidden; color: #dedfe3; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
 .editorial-description { overflow: hidden; display: -webkit-box; color: #9ba2ad; font-size: 12px; line-height: 1.45; -webkit-box-orient: vertical; -webkit-line-clamp: 2; }
@@ -178,6 +179,7 @@ button.editorial-card-body:focus-visible { border-radius: 3px; outline: 2px soli
 .wowhead-source.source-dungeon { border-color: #306b87; color: #78c9ed; background: #10232c; }
 .wowhead-source.source-delves { border-color: #397349; color: #84d89a; background: #12261a; }
 .wowhead-source.source-crafting { border-color: #8a5528; color: #e8a360; background: #2a1b0f; }
+.wowhead-source.source-world { border-color: #76692e; color: #dfcc72; background: #26230f; }
 .wowhead-note-panel { margin-top: 12px; min-height: 105px; padding: 15px 18px; display: grid; grid-template-columns: auto minmax(170px, .65fr) minmax(280px, 1.35fr) auto; align-items: center; gap: 14px; }
 .wowhead-note-panel.note-without-action { grid-template-columns: auto minmax(170px, .65fr) minmax(280px, 1.35fr); }
 .wowhead-note-panel > .item-tooltip-anchor .item-icon { width: 54px; height: 54px; flex-basis: 54px; border-color: #8b6f42; }

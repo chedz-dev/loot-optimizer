@@ -7,6 +7,7 @@ const CONTENT_TYPE_KEYS = {
   delves: 'common.delves',
   crafting: 'common.crafting',
   pvp: 'common.pvp',
+  world: 'common.world',
   unknown: 'common.unknown',
 };
 

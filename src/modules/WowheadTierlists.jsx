@@ -36,7 +36,7 @@ export default function WowheadTierlists() {
   const sourceOptions = useMemo(() => {
     if (!guide) return ['all'];
     const values = new Set(guide.tiers.flatMap((tier) => tier.items.flatMap((item) => item.contentTypes)));
-    return ['all', ...['raid', 'dungeon', 'delves', 'crafting'].filter((entry) => values.has(entry))];
+    return ['all', ...['raid', 'dungeon', 'delves', 'world', 'crafting'].filter((entry) => values.has(entry))];
   }, [guide]);
 
   const visibleTiers = useMemo(() => {
@@ -104,7 +104,7 @@ export default function WowheadTierlists() {
         <div className="panel-head wowhead-tier-head">
           <div><small>{t('guide.originalTierList')}</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p></div>
           <div className="segment-control wowhead-source-filter">
-            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setExpandedCard(null); }}>{t({ all: 'common.all', raid: 'common.raid', dungeon: 'common.mythicPlus', delves: 'common.delves', crafting: 'common.crafting' }[entry])}</button>)}
+            {sourceOptions.map((entry) => <button key={entry} className={source === entry ? 'active' : ''} onClick={() => { setSource(entry); setExpandedCard(null); }}>{t({ all: 'common.all', raid: 'common.raid', dungeon: 'common.mythicPlus', delves: 'common.delves', world: 'common.world', crafting: 'common.crafting' }[entry])}</button>)}
           </div>
         </div>
 

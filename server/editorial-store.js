@@ -56,6 +56,11 @@ function canonicalItemMap(store) {
   return new Map(store.data.items.map((item) => [item.itemId, item]));
 }
 
+function singleOrigin(types = []) {
+  const normalized = [...new Set(types.filter((type) => type && type !== 'unknown'))];
+  return normalized.length === 1 ? normalized : [];
+}
+
 function resolveGuide(store, guide) {
   if (!guide) return null;
   const items = canonicalItemMap(store);
@@ -66,7 +71,8 @@ function resolveGuide(store, guide) {
     items: tier.items.map((item) => {
       const canonical = items.get(item.itemId);
       const signalContentTypes = item.signalContentTypes || [];
-      const originTypes = canonicalItemOrigins.get(item.itemId) || canonical?.originTypes || item.originTypes || [];
+      const originTypes = canonicalItemOrigins.get(item.itemId)
+        || singleOrigin(canonical?.originTypes || item.originTypes || []);
       return {
         ...item,
         name: canonical?.name || item.name,
@@ -77,7 +83,7 @@ function resolveGuide(store, guide) {
         season: canonicalItemSeasons.get(item.itemId) || item.season || null,
         signalContentTypes,
         originTypes,
-        contentTypes: originTypes.length ? originTypes : signalContentTypes,
+        contentTypes: originTypes.length ? originTypes : singleOrigin(signalContentTypes),
       };
     }),
   }));
@@ -102,9 +108,10 @@ function applyGuideSnapshot(source, guide, store) {
       const signalContentTypes = item.signalContentTypes
         || (source === 'wowhead' ? item.contentTypes || [] : []);
       const existing = items.get(item.itemId);
-      const inferredOrigins = signalContentTypes.filter((type) => type && type !== 'unknown');
+      const inferredOrigins = singleOrigin(signalContentTypes);
       const originTypes = canonicalItemOrigins.get(item.itemId)
-        || [...new Set([...(existing?.originTypes || []), ...inferredOrigins])].sort();
+        || singleOrigin(existing?.originTypes || [])
+        || inferredOrigins;
       const canonical = {
         itemId: item.itemId,
         name: item.name || existing?.name || `Item ${item.itemId}`,

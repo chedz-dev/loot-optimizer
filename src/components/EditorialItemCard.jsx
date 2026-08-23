@@ -11,6 +11,12 @@ export default function EditorialItemCard({ item, expanded, onToggle }) {
   const note = item.guideNote?.trim() || '';
   const hasDropDetails = Boolean(item.drop?.instance || item.drop?.encounter);
   const canExpand = hasDropDetails || note.length > COLLAPSED_NOTE_LENGTH;
+  const primaryType = item.contentTypes?.[0];
+  const inlineOrigin = primaryType === 'dungeon'
+    ? item.drop?.instance
+    : primaryType === 'raid'
+      ? item.drop?.encounter
+      : '';
 
   return (
     <article className={`editorial-item-card ${canExpand ? 'expandable' : 'static'} ${expanded ? 'expanded' : ''}`}>
@@ -24,7 +30,11 @@ export default function EditorialItemCard({ item, expanded, onToggle }) {
           onClick={onToggle}
         >
           <span className="editorial-card-heading">
-            <span className="editorial-card-badges"><ContentTypeBadge types={item.contentTypes} />{item.season?.label && <span className="editorial-season-badge">{item.season.label}</span>}</span>
+            <span className="editorial-card-badges">
+              <ContentTypeBadge types={item.contentTypes} />
+              {inlineOrigin && <span className="editorial-origin-inline">{inlineOrigin}</span>}
+              {item.season?.label && <span className="editorial-season-badge">{item.season.label}</span>}
+            </span>
             <b>{name}</b>
           </span>
           {note && <span className={`editorial-description ${expanded ? 'full' : ''}`}>{note}</span>}
@@ -44,7 +54,11 @@ export default function EditorialItemCard({ item, expanded, onToggle }) {
       ) : (
         <span className="editorial-card-body editorial-card-static">
           <span className="editorial-card-heading">
-            <span className="editorial-card-badges"><ContentTypeBadge types={item.contentTypes} />{item.season?.label && <span className="editorial-season-badge">{item.season.label}</span>}</span>
+            <span className="editorial-card-badges">
+              <ContentTypeBadge types={item.contentTypes} />
+              {inlineOrigin && <span className="editorial-origin-inline">{inlineOrigin}</span>}
+              {item.season?.label && <span className="editorial-season-badge">{item.season.label}</span>}
+            </span>
             <b>{name}</b>
           </span>
           {note && <span className="editorial-description full">{note}</span>}
