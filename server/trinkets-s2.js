@@ -1,6 +1,6 @@
 const sources = ['wowhead'];
 
-const trinket = ({ id, itemId, name, category, instance, encounter, icon, type, focus = 'universal' }) => ({
+const trinket = ({ id, itemId, name, category, instance, encounter, sourceType, icon, type, focus = 'universal' }) => ({
   id,
   itemId,
   name,
@@ -9,7 +9,7 @@ const trinket = ({ id, itemId, name, category, instance, encounter, icon, type, 
   drop: {
     encounter,
     instance,
-    sourceType: category === 'raid' ? 'Raid' : 'Mythic+',
+    sourceType: sourceType || (category === 'raid' ? 'Raid' : 'Mythic+'),
   },
   icon,
   type,
@@ -32,6 +32,7 @@ export const rankingItems = [
   trinket({ id: 'zuljin-technique', itemId: 270173, name: "Zul'jin's Guillotine Technique", category: 'raid', instance: 'The Venomous Abyss', encounter: 'The Coiled Altar', icon: 'inv_121_trinket_raid_ulatek_trolltablet', type: 'passive' }),
   trinket({ id: 'font-venomous-rage', itemId: 270168, name: 'Font of Venomous Rage', category: 'raid', instance: 'The Venomous Abyss', encounter: "Ula'tek", icon: 'inv_10_dungeonjewelry_dragon_trinket_3djardintrophy_green', type: 'on-use' }),
   trinket({ id: 'voracious-heart', itemId: 270175, name: "Voracious Heart of Ula'tek", category: 'raid', instance: 'The Venomous Abyss', encounter: "Ula'tek", icon: 'inv_121_trinket_raid_ulatek_heart', type: 'on-use' }),
+  trinket({ id: 'wavecallers-seastone', itemId: 270167, name: "Wavecaller's Seastone", category: 'raid', instance: 'The Tidebound Grotto', encounter: 'Nymrissa Wavecaller', sourceType: 'Lair', icon: 'inv_tradeskillitem_sorcererswater', type: 'passive', focus: 'intellect' }),
 
   trinket({ id: 'coiled-fangstone', itemId: 273795, name: 'Coiled Fangstone', category: 'mythic-plus', instance: 'Altar of Fangs', encounter: "Rav'i", icon: 'inv_121_trinket_dungeon_ulatek_fangstone', type: 'on-use', focus: 'strength' }),
   trinket({ id: 'vial', itemId: 273796, name: 'Vile Vial of Volatile Venom', category: 'mythic-plus', instance: 'Altar of Fangs', encounter: "Rav'i", icon: 'inv_121_trinket_dungeon_ulatek_vile', type: 'on-use' }),

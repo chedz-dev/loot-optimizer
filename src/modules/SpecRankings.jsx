@@ -83,7 +83,7 @@ export default function SpecRankings() {
           {visibleItems.map((item) => (
             <button key={item.id} className={itemId === item.id ? 'active' : ''} onClick={() => setItemId(item.id)}>
               <ItemIcon item={item} />
-              <span><span className={`source-badge source-${item.category}`}>{item.category === 'raid' ? 'RAID' : 'M+'}</span><b>{localizedItemName(item, language)}</b><small>{item.drop.encounter} · {item.drop.instance}</small></span>
+              <span><span className={`source-badge source-${item.drop.sourceType === 'Lair' ? 'lair' : item.category}`}>{item.drop.sourceType === 'Lair' ? 'LAIR' : item.category === 'raid' ? 'RAID' : 'M+'}</span><b>{localizedItemName(item, language)}</b><small>{item.drop.encounter} · {item.drop.instance}</small></span>
               <i />
             </button>
           ))}

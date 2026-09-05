@@ -21,10 +21,22 @@ test('ranking por item omite specs cuando no recibe evidencia de ninguna fuente'
 });
 
 test('todos los trinkets tienen icono, Wowhead ID y procedencia', () => {
-  assert.equal(rankingItems.length, 41);
-  assert.equal(rankingItems.filter((item) => item.category === 'raid').length, 14);
+  assert.equal(rankingItems.length, 42);
+  assert.equal(rankingItems.filter((item) => item.category === 'raid').length, 15);
   assert.equal(rankingItems.filter((item) => item.category === 'mythic-plus').length, 27);
   assert.ok(rankingItems.every((item) => item.itemId && item.icon && item.drop?.encounter && item.drop?.instance && item.drop?.sourceType));
+});
+
+test('el Lair de Nymrissa figura en rankings con su procedencia correcta', () => {
+  const item = rankingItems.find((entry) => entry.itemId === 270167);
+  assert.equal(item?.id, 'wavecallers-seastone');
+  assert.equal(item?.category, 'raid');
+  assert.deepEqual(item?.drop, {
+    encounter: 'Nymrissa Wavecaller',
+    instance: 'The Tidebound Grotto',
+    sourceType: 'Lair',
+  });
+  assert.equal(item?.type, 'passive');
 });
 
 test('el catálogo de rankings no contiene trinkets de Season 1', () => {
