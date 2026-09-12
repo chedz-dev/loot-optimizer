@@ -90,6 +90,58 @@ function findTierListBlock(decodedHtml) {
   return decodedHtml.slice(start, end + '[/tier-list]'.length);
 }
 
+function htmlAttributes(tag) {
+  const attributes = {};
+  for (const match of tag.matchAll(/([\w:-]+)\s*=\s*(["'])(.*?)\2/gs)) attributes[match[1].toLowerCase()] = decodeEntities(match[3]);
+  return attributes;
+}
+
+function schemaAuthor(author) {
+  if (Array.isArray(author)) return author.map(schemaAuthor).filter(Boolean).join(', ');
+  if (typeof author === 'string') return decodeEntities(author).trim();
+  return typeof author?.name === 'string' ? decodeEntities(author.name).trim() : '';
+}
+
+function guidePublicationMetadata(html, decodedHtml, guide) {
+  const articles = [];
+  function inspectSchema(value) {
+    if (Array.isArray(value)) { value.forEach(inspectSchema); return; }
+    if (!value || typeof value !== 'object') return;
+    const types = [value['@type']].flat();
+    if (types.some((type) => ['Article', 'NewsArticle', 'BlogPosting', 'TechArticle'].includes(type))) articles.push(value);
+    inspectSchema(value['@graph']);
+    inspectSchema(value.mainEntity);
+  }
+  for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)) {
+    if (htmlAttributes(match[1]).type?.toLowerCase() !== 'application/ld+json') continue;
+    try { inspectSchema(JSON.parse(match[2])); } catch { /* Malformed structured data must not invent attribution. */ }
+  }
+  // If a page embeds several articles, select only its own URL. A solitary
+  // Article is a standard page-level schema; breadcrumb and Person nodes are
+  // never interpreted as the guide's attribution by themselves.
+  const articleUrls = (article) => [article.url, article['@id'], article.mainEntityOfPage?.['@id'], article.mainEntityOfPage]
+    .filter((url) => typeof url === 'string' && /^https?:\/\//i.test(url));
+  const pageArticle = articles.find((article) => articleUrls(article).some((url) => url.split('#')[0] === guide.url))
+    || (articles.length === 1 && articleUrls(articles[0]).length === 0 ? articles[0] : null);
+  const meta = new Map();
+  for (const match of decodedHtml.matchAll(/<meta\b[^>]*>/gi)) {
+    const attributes = htmlAttributes(match[0]);
+    const name = (attributes.name || attributes.property || attributes.itemprop || '').toLowerCase();
+    if (name && attributes.content) meta.set(name, attributes.content.trim());
+  }
+  const modifiedTime = [...decodedHtml.matchAll(/<time\b[^>]*>/gi)]
+    .map((match) => htmlAttributes(match[0]))
+    .find((attributes) => attributes.itemprop?.toLowerCase() === 'datemodified')?.datetime;
+  const visibleText = decodeEntities(decodedHtml.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ');
+  const visibleUpdated = visibleText.match(/\bUpdated:\s*(\d{4}[/-]\d{2}[/-]\d{2})/i)?.[1];
+  return {
+    author: schemaAuthor(pageArticle?.author) || meta.get('author') || '',
+    pageUpdatedAt: (typeof pageArticle?.dateModified === 'string' ? pageArticle.dateModified : '')
+      || meta.get('article:modified_time') || meta.get('datemodified') || modifiedTime || visibleUpdated || '',
+  };
+}
+
 export function parseWowheadGuideHtml(html, guide) {
   const decodedHtml = decodeGuideSource(html);
   const block = findTierListBlock(decodedHtml);
@@ -139,12 +191,12 @@ export function parseWowheadGuideHtml(html, guide) {
   }
 
   const patch = decodedHtml.match(/Patch\s+(\d+\.\d+(?:\.\d+)?)/i)?.[1] || '';
-  const updated = decodedHtml.match(/Updated:\s*(\d{4}\/\d{2}\/\d{2})/i)?.[1] || '';
+  const publication = guidePublicationMetadata(html, decodedHtml, guide);
   return {
     ...guide,
     pageTitle: decodeEntities(title),
     patch,
-    pageUpdatedAt: updated,
+    ...publication,
     fetchedAt: new Date().toISOString(),
     contentHash: createHash('sha256').update(block).digest('hex'),
     itemCount,

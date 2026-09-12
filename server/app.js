@@ -8,6 +8,7 @@ import { classSpecs, getItemRankings, getSpecRankings, rankingItems } from './ra
 import { getWowheadTierlists } from './wowhead-tierlists.js';
 import { getIcyVeinsTierlists } from './icyveins-tierlists.js';
 import { getCanonicalItem, getEditorialDataStatus, getRankingSignalsForItem } from './editorial-store.js';
+import { createWarcraftLogsRouter } from './warcraftlogs-routes.js';
 
 const withLocalizedName = (item) => {
   const canonical = getCanonicalItem(item.itemId);
@@ -18,6 +19,7 @@ const app = express();
 
 app.use(cors());
 app.use(express.json({ limit: '1mb' }));
+app.use('/api/warcraftlogs', createWarcraftLogsRouter());
 
 app.get('/api/health', (_req, res) => res.json({ ok: true, service: 'loot-council-optimizer' }));
 app.get('/api/sources', (_req, res) => res.json({ sources: getSourceStatus() }));

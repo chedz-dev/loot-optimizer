@@ -1,3 +1,5 @@
+import { warcraftLogsClient } from './warcraftlogs-client.js';
+
 const jsonFetch = async (url, options = {}) => {
   const response = await fetch(url, { ...options, signal: AbortSignal.timeout(8000) });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
@@ -37,7 +39,7 @@ export function getSourceStatus() {
   return sourceCatalog.map((source) => ({
     ...source,
     status: source.id === 'raiderio' ? 'ready'
-      : source.id === 'warcraftlogs' && hasWcl ? 'ready'
+      : source.id === 'warcraftlogs' && hasWcl ? 'configured'
       : source.id === 'bloodmallet' ? 'dataset'
       : source.id === 'warcraftlogs' ? 'credentials-required'
       : 'reference-only',
@@ -49,29 +51,6 @@ export async function getRaiderIoCharacter({ region, realm, name }) {
   return jsonFetch(`https://raider.io/api/v1/characters/profile?${params}`);
 }
 
-let wclToken = null;
-let wclTokenExpiry = 0;
-async function getWarcraftLogsToken() {
-  if (wclToken && Date.now() < wclTokenExpiry) return wclToken;
-  const id = process.env.WARCRAFTLOGS_CLIENT_ID;
-  const secret = process.env.WARCRAFTLOGS_CLIENT_SECRET;
-  if (!id || !secret) throw new Error('Faltan credenciales de Warcraft Logs');
-  const auth = Buffer.from(`${id}:${secret}`).toString('base64');
-  const data = await jsonFetch('https://www.warcraftlogs.com/oauth/token', {
-    method: 'POST',
-    headers: { Authorization: `Basic ${auth}`, 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: 'grant_type=client_credentials',
-  });
-  wclToken = data.access_token;
-  wclTokenExpiry = Date.now() + (data.expires_in - 60) * 1000;
-  return wclToken;
-}
-
 export async function queryWarcraftLogs(query, variables = {}) {
-  const token = await getWarcraftLogsToken();
-  return jsonFetch('https://www.warcraftlogs.com/api/v2/client', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ query, variables }),
-  });
+  return { data: await warcraftLogsClient.query(query, variables) };
 }

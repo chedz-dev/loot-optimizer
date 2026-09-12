@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import ClassSpecIcon from '../components/ClassSpecIcon.jsx';
 import EditorialItemCard from '../components/EditorialItemCard.jsx';
+import GuideMetadata from '../components/GuideMetadata.jsx';
 import { dataFetch } from '../data-client.js';
 import { useI18n } from '../i18n.jsx';
 import { usePersistentState } from '../use-persistent-state.js';
@@ -9,7 +10,7 @@ import { showTechnicalMetadata } from '../build-mode.js';
 const tierClass = (label) => label.toLocaleLowerCase().replace('+', '-plus').replace(/[^a-z0-9-]/g, '');
 
 export default function IcyVeinsTierlists() {
-  const { language, t } = useI18n();
+  const { t } = useI18n();
   const [payload, setPayload] = useState(null);
   const [classId, setClassId] = usePersistentState('loot-icyveins-class', 'hunter');
   const [guideId, setGuideId] = usePersistentState('loot-icyveins-guide', 'hunter-beast-mastery');
@@ -76,8 +77,7 @@ export default function IcyVeinsTierlists() {
 
       <section className="panel wowhead-tier-panel">
         <div className="panel-head wowhead-tier-head">
-          <div><small>{t('guide.originalTierList')}</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p></div>
-          <div className="icy-guide-meta"><span>{t('guide.author')}</span><b>{guide.author || t('guide.unknownAuthor')}</b><span>{t('guide.updated')}</span><b>{guide.pageUpdatedAt ? new Date(guide.pageUpdatedAt).toLocaleDateString(language === 'es' ? 'es-MX' : 'en-US') : t('guide.unknownDate')}</b></div>
+          <div><small>{t('guide.originalTierList')}</small><h2>{guide.specName} {guide.className}</h2><p>{guide.pageTitle}</p><GuideMetadata guide={guide} /></div>
         </div>
 
         <div className="wowhead-tier-board">
@@ -95,7 +95,7 @@ export default function IcyVeinsTierlists() {
         </div>
       </section>
 
-      <p className="wowhead-method-note">{t('guide.icyMethod')}</p>
+      {showTechnicalMetadata && <p className="wowhead-method-note">{t('guide.icyMethod')}</p>}
     </div>
   );
 }

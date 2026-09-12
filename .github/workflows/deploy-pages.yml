@@ -30,11 +30,13 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm sync:data
+      - run: pnpm test
       - run: pnpm build
         env:
           VITE_STATIC_DATA: 'true'
           VITE_SHOW_TECHNICAL_METADATA: 'false'
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
+      - run: node scripts/check-static-build.js
       - uses: actions/configure-pages@v5
         with:
           enablement: true

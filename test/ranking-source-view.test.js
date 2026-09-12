@@ -36,3 +36,16 @@ test('la tier list editorial muestra solamente los tiers originales presentes', 
   const icyveins = sourceRankings(rankings, 'icyveins');
   assert.deepEqual(visibleTiers(icyveins, 'icyveins'), ['A', 'C']);
 });
+
+test('la tier list unificada conserva los tiers bajos y no oculta resultados D, F o G', () => {
+  assert.deepEqual(visibleTiers([{ tier: 'D' }, { tier: 'S' }, { tier: 'G' }, { tier: 'F' }]), ['S', 'D', 'F', 'G']);
+});
+
+test('una fuente ambigua no presenta el mejor de sus tiers como tier original', () => {
+  const ambiguous = {
+    className: 'Mage', specName: 'Fire', tier: 'B',
+    sourceTiers: { wowhead: 'S' },
+    sourceScores: { wowhead: { status: 'ambiguous', rawValue: 'S', rawValues: ['S', 'D'] } },
+  };
+  assert.deepEqual(sourceRankings([ambiguous], 'wowhead'), []);
+});

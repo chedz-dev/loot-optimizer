@@ -1,0 +1,288 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-09-07",
+  "currentSeason": {
+    "id": "midnight-s2",
+    "label": "S2",
+    "name": "Midnight Season 2"
+  },
+  "policy": "Classify availability in the current seasonal loot pool by item ID, not the expansion where the item first appeared or the item level of a particular equipped copy. Unverified IDs remain unknown.",
+  "items": [
+    {
+      "itemId": 193701,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/news/full-list-of-bonus-roll-loot-from-dungeons-in-midnight-season-1-381322",
+      "reason": "Algethar Academy Season 1 dungeon loot; absent from the active Season 2 M+ rotation.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/mythic-plus-season-overview"
+      ]
+    },
+    {
+      "itemId": 241340,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.icy-veins.com/wow/professions-alchemy/",
+      "reason": "The Season 2 alchemy guide retains this spark-crafted trinket."
+    },
+    {
+      "itemId": 246304,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-gear-best-in-slot",
+      "reason": "The Season 2 guide explicitly discusses crafting these Darkmoon trinkets versus alternative embellishments."
+    },
+    {
+      "itemId": 246305,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.icy-veins.com/wow/havoc-demon-hunter-pve-dps-gear-best-in-slot",
+      "reason": "The Season 2 guide explicitly discusses crafting these Darkmoon trinkets versus alternative embellishments."
+    },
+    {
+      "itemId": 248583,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.wowhead.com/guide/classes/shaman/restoration/bis-gear",
+      "reason": "The Season 2 guide describes obtaining these Hero-track Delve trinkets through the current Delvers Journey."
+    },
+    {
+      "itemId": 249339,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249341,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249342,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249343,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.icy-veins.com/wow/news/midnight-pre-season-1-trinket-tuning-march-16th/",
+      "reason": "Gaze of the Alnseer belongs to the Season 1 Dreamrift loot pool; existing canonical metadata identifies it as S1."
+    },
+    {
+      "itemId": 249344,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249346,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249806,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "March on QuelDanas raid loot belongs to the Season 1 raid pool.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/season-1-overview-dungeons-raids-dates"
+      ]
+    },
+    {
+      "itemId": 249808,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249809,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the Season 1 Voidspire raid loot pool."
+    },
+    {
+      "itemId": 249810,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "March on QuelDanas raid loot belongs to the Season 1 raid pool.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/season-1-overview-dungeons-raids-dates"
+      ]
+    },
+    {
+      "itemId": 249811,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "March on QuelDanas raid loot belongs to the Season 1 raid pool.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/season-1-overview-dungeons-raids-dates"
+      ]
+    },
+    {
+      "itemId": 250144,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/windrunner-spire-dungeon-overview-location-rewards",
+      "reason": "Season 1 Windrunner Spire trinket; this dungeon is explicitly outside the Season 2 M+ rotation."
+    },
+    {
+      "itemId": 250223,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/maisara-caverns-dungeon-overview-location-rewards",
+      "reason": "Season 1 Maisara Caverns trinket; this dungeon is explicitly outside the Season 2 M+ rotation."
+    },
+    {
+      "itemId": 250253,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/nexus-point-xenas-dungeon-overview-location-rewards",
+      "reason": "Season 1 Nexus-Point Xenas trinket; this dungeon is explicitly outside the Season 2 M+ rotation."
+    },
+    {
+      "itemId": 250256,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/windrunner-spire-dungeon-overview-location-rewards",
+      "reason": "Season 1 Windrunner Spire trinket; this dungeon is explicitly outside the Season 2 M+ rotation."
+    },
+    {
+      "itemId": 251783,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.wowhead.com/item=251783/lost-idol-of-the-hashey",
+      "reason": "Vendor data includes The Ring of Glory, a new Season 2 delve.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/season-2-overview-dungeons-raids-dates"
+      ]
+    },
+    {
+      "itemId": 251792,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.wowhead.com/guide/classes/shaman/restoration/bis-gear",
+      "reason": "The Season 2 guide describes obtaining these Hero-track Delve trinkets through the current Delvers Journey."
+    },
+    {
+      "itemId": 252411,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/skyreach-dungeon-overview-mythicplus",
+      "reason": "Skyreach Season 1 dungeon loot; absent from the active Season 2 M+ rotation.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/mythic-plus-season-overview"
+      ]
+    },
+    {
+      "itemId": 252420,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/skyreach-dungeon-overview-mythicplus",
+      "reason": "Skyreach Season 1 dungeon loot; absent from the active Season 2 M+ rotation.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/mythic-plus-season-overview"
+      ]
+    },
+    {
+      "itemId": 260235,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/item=249806/radiant-plume",
+      "reason": "Umbral Plume is the transformed counterpart of Radiant Plume from the Season 1 raid.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/midnight/season-1-overview-dungeons-raids-dates"
+      ]
+    },
+    {
+      "itemId": 264507,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.wowhead.com/news/renown-quest-rewards-reset-and-now-item-level-279-in-patch-12-1-382390",
+      "reason": "The renown quest resets in Season 2 and offers a new scaled version of this existing item.",
+      "supportingSourceUrls": [
+        "https://www.icy-veins.com/wow/news/players-are-picking-up-four-easy-gear-upgrades-in-midnight-season-2/"
+      ]
+    },
+    {
+      "itemId": 268292,
+      "status": "past",
+      "seasonId": "midnight-s1",
+      "label": "S1",
+      "sourceUrl": "https://www.wowhead.com/news/sporefall-raid-gear-has-new-stats-in-patch-12-0-7-381697",
+      "reason": "Sporefall gear, including this Rotmire trinket, is explicitly described as Season 1 loot."
+    },
+    {
+      "itemId": 270602,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.icy-veins.com/wow/marksmanship-hunter-pvp-stat-priority-gear-and-trinkets",
+      "reason": "Venomous Gladiator trinkets belong to the current Season 2 PvP gear set.",
+      "supportingSourceUrls": [
+        "https://www.icy-veins.com/wow/midnight-pvp-season-2-guide"
+      ]
+    },
+    {
+      "itemId": 270603,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.icy-veins.com/wow/marksmanship-hunter-pvp-stat-priority-gear-and-trinkets",
+      "reason": "Venomous Gladiator trinkets belong to the current Season 2 PvP gear set.",
+      "supportingSourceUrls": [
+        "https://www.icy-veins.com/wow/midnight-pvp-season-2-guide"
+      ]
+    },
+    {
+      "itemId": 274493,
+      "status": "current",
+      "seasonId": "midnight-s2",
+      "label": "S2",
+      "sourceUrl": "https://www.method.gg/guides/holy-priest/gearing",
+      "reason": "The 12.1 guide identifies this as a current Delve alternative and distinguishes its list from retained Season 1 gear.",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/item=274493/effigy-of-ulateks-faithful"
+      ]
+    }
+  ]
+}

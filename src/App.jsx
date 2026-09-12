@@ -2,16 +2,21 @@ import { useEffect, useMemo, useState } from 'react';
 import SpecRankings from './modules/SpecRankings.jsx';
 import WowheadTierlists from './modules/WowheadTierlists.jsx';
 import IcyVeinsTierlists from './modules/IcyVeinsTierlists.jsx';
+import WarcraftLogsPopularity from './modules/WarcraftLogsPopularity.jsx';
 import ItemIcon from './components/ItemIcon.jsx';
 import { dataFetch } from './data-client.js';
 import { useI18n } from './i18n.jsx';
 import { usePersistentState } from './use-persistent-state.js';
+import { isStaticBuild } from './build-mode.js';
+
+const publicViews = ['rankings', 'wowhead', 'icyveins'];
 
 const sourceLabelKeys = {
   ready: 'source.connected',
   dataset: 'source.dataset',
   'credentials-required': 'source.credentials',
   'reference-only': 'source.reference',
+  configured: 'source.configured',
 };
 
 function SourcePill({ source, t }) {
@@ -36,6 +41,8 @@ function ScoreBar({ label, value, tint = 'gold' }) {
 function App() {
   const { language, setLanguage, t } = useI18n();
   const [view, setView] = usePersistentState('loot-view', 'rankings');
+  const activeView = isStaticBuild && !publicViews.includes(view) ? 'rankings' : view;
+  const [warcraftLogsVisited, setWarcraftLogsVisited] = useState(!isStaticBuild && view === 'warcraftlogs');
   const [data, setData] = useState(null);
   const [sources, setSources] = useState([]);
   const [selected, setSelected] = useState('gebbo');
@@ -45,6 +52,11 @@ function App() {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (!isStaticBuild && view === 'warcraftlogs') setWarcraftLogsVisited(true);
+  }, [view]);
+
+  useEffect(() => {
+    if (isStaticBuild) return;
     Promise.all([
       dataFetch('/api/demo').then((res) => res.json()),
       dataFetch('/api/sources').then((res) => res.json()),
@@ -88,8 +100,8 @@ function App() {
     ? current.filter((item) => item !== id)
     : [...current, id]);
 
-  if (!data) return <div className="loading">{t('loading.app')}</div>;
-  const currentTrinket = data.trinkets.find((item) => item.id === selected);
+  if (!isStaticBuild && !data) return <div className="loading">{t('loading.app')}</div>;
+  const currentTrinket = data?.trinkets.find((item) => item.id === selected);
 
   return (
     <div className="app-shell">
@@ -101,11 +113,12 @@ function App() {
         </div>
         <nav>
           <button className="disabled" disabled title={t('nav.soon')}><span>01</span> {t('nav.optimization')}</button>
-          <button className={view === 'rankings' ? 'active' : ''} onClick={() => setView('rankings')}><span>02</span> {t('nav.rankings')}</button>
+          <button className={activeView === 'rankings' ? 'active' : ''} onClick={() => setView('rankings')}><span>02</span> {t('nav.rankings')}</button>
           <button className={view === 'wowhead' ? 'active' : ''} onClick={() => setView('wowhead')}><span>03</span> {t('nav.wowhead')}</button>
           <button className={view === 'icyveins' ? 'active' : ''} onClick={() => setView('icyveins')}><span>04</span> {t('nav.icyveins')}</button>
-          <button className="disabled" disabled title={t('nav.soon')}><span>05</span> {t('nav.roster')}</button>
-          <button className="disabled" disabled title={t('nav.soon')}><span>06</span> {t('nav.history')}</button>
+          {!isStaticBuild && <button className={activeView === 'warcraftlogs' ? 'active' : ''} onClick={() => setView('warcraftlogs')}><span>05</span> Warcraft Logs</button>}
+          <button className="disabled" disabled title={t('nav.soon')}><span>{isStaticBuild ? '05' : '06'}</span> {t('nav.roster')}</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>{isStaticBuild ? '06' : '07'}</span> {t('nav.history')}</button>
         </nav>
         <div className="season-card">
           <small>{t('season.active')}</small>
@@ -119,10 +132,11 @@ function App() {
           <span>{t('language.label')}</span>
           <div><button className={language === 'es' ? 'active' : ''} onClick={() => setLanguage('es')}>ES</button><button className={language === 'en' ? 'active' : ''} onClick={() => setLanguage('en')}>EN</button></div>
         </div>
-        <div className="module-view" hidden={view !== 'rankings'}><SpecRankings /></div>
-        <div className="module-view" hidden={view !== 'wowhead'}><WowheadTierlists /></div>
-        <div className="module-view" hidden={view !== 'icyveins'}><IcyVeinsTierlists /></div>
-        {!['rankings', 'wowhead', 'icyveins'].includes(view) && <>
+        <div className="module-view" hidden={activeView !== 'rankings'}><SpecRankings /></div>
+        <div className="module-view" hidden={activeView !== 'wowhead'}><WowheadTierlists /></div>
+        <div className="module-view" hidden={activeView !== 'icyveins'}><IcyVeinsTierlists /></div>
+        {!isStaticBuild && warcraftLogsVisited && <div className="module-view" hidden={activeView !== 'warcraftlogs'}><WarcraftLogsPopularity active={activeView === 'warcraftlogs'} /></div>}
+        {!isStaticBuild && !['rankings', 'wowhead', 'icyveins', 'warcraftlogs'].includes(activeView) && <>
         <header>
           <div><p className="eyebrow">DECISIÓN BASADA EN DATOS</p><h1>Optimización de trinkets</h1><p>Cruza simulaciones, rendimiento real, guías y necesidad de mejora.</p></div>
           <button className="primary" onClick={optimize} disabled={!drops.length || busy}>{busy ? 'Calculando...' : 'Optimizar asignación'}</button>

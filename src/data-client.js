@@ -3,8 +3,6 @@ const staticBase = `${import.meta.env.BASE_URL}data/`;
 
 function staticPath(input) {
   const url = new URL(input, window.location.origin);
-  if (url.pathname === '/api/demo') return 'demo.json';
-  if (url.pathname === '/api/sources') return 'sources.json';
   if (url.pathname === '/api/rankings/catalog') return 'catalog.json';
   if (url.pathname === '/api/wowhead/tierlists') return 'tierlists/wowhead.json';
   if (url.pathname === '/api/icyveins/tierlists') return 'tierlists/icyveins.json';

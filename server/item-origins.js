@@ -1,4 +1,5 @@
 import { rankingItems } from './trinkets-s2.js';
+import verifiedOrigins from '../data/item-origin-overrides.json' with { type: 'json' };
 
 const editorialOriginOverrides = {
   193718: ['dungeon'],
@@ -45,11 +46,13 @@ const editorialDropOverrides = {
 export const canonicalItemOrigins = new Map([
   ...rankingItems.map((item) => [item.itemId, [item.category === 'mythic-plus' ? 'dungeon' : 'raid']]),
   ...Object.entries(editorialOriginOverrides).map(([itemId, origins]) => [Number(itemId), origins]),
+  ...verifiedOrigins.items.map((item) => [item.itemId, item.originTypes]),
 ]);
 
 export const canonicalItemDropDetails = new Map([
   ...rankingItems.map((item) => [item.itemId, item.drop]),
   ...Object.entries(editorialDropOverrides).map(([itemId, drop]) => [Number(itemId), drop]),
+  ...verifiedOrigins.items.map((item) => [item.itemId, item.drop]),
 ]);
 
 export const canonicalItemSeasons = new Map([

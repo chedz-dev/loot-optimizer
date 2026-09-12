@@ -195,6 +195,10 @@ button.editorial-card-body:focus-visible { border-radius: 3px; outline: 2px soli
 .icy-guide-meta { display: grid; grid-template-columns: auto auto; gap: 3px 9px; align-items: center; }
 .icy-guide-meta span { color: #606874; font-size: 8px; text-transform: uppercase; }
 .icy-guide-meta b { color: #8bcad9; font-size: 9px; }
+.guide-public-metadata { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 14px 0 0; }
+.guide-public-metadata > div { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; min-width: 0; }
+.guide-public-metadata dt { color: #929ba9; font-size: 13px; }
+.guide-public-metadata dd { margin: 0; color: #c6cdd7; font-size: 14px; font-weight: 650; overflow-wrap: anywhere; }
 .wowhead-source.icy-source { border-color: #176b87; color: #68cbe8; background: #10232b; }
 .icy-note-panel > a { border-color: #1c657b; color: #72c9df; }
 

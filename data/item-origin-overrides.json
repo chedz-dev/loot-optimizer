@@ -1,0 +1,657 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-09-07",
+  "policy": "Canonical acquisition category, independent of where an item is used or its season. Omit unverified bosses. Overrides take precedence over inferred editorial categories.",
+  "items": [
+    {
+      "itemId": 155947,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Razorscale"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=155947/living-flame",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156000,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Kologarn"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156000/wrathstone",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156016,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Flame Leviathan"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156016/pyrite-infuser",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156021,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Flame Leviathan"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156021/energy-siphon",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156036,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Razorscale"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156036/eye-of-the-broodmother",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156187,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Thorim"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156187/scale-of-fates",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156207,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Mimiron"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156207/pandoras-plea",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156230,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "General Vezax"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156230/flare-of-the-heavens",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156234,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Yogg-Saron"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156234/blood-of-the-old-god",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156288,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Auriaya"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156288/elemental-focus-stone",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156308,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Thorim"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156308/sifs-remembrance",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 156310,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Ulduar (Timewalking)",
+        "encounter": "Thorim"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=156310/mjolnir-runestone",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/guide/ulduar-timewalking-loot-and-transmogrification-guide-5850"
+      ],
+      "reason": "The exact retail item tooltip identifies the Ulduar boss. Origin does not confirm its seasonal availability."
+    },
+    {
+      "itemId": 265657,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=265657/fiber-of-living-agony",
+      "reason": "Tooltip confirms acquisition through Tier 11 Delves. This display category is not a claim of exclusive acquisition or current-season availability."
+    },
+    {
+      "itemId": 264694,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=264694/ultradon-cuirass",
+      "reason": "Tooltip confirms acquisition through Tier 11 Delves. This display category is not a claim of exclusive acquisition or current-season availability."
+    },
+    {
+      "itemId": 264701,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=264701/cosmic-bell",
+      "reason": "Tooltip confirms acquisition through Tier 11 Delves. This display category is not a claim of exclusive acquisition or current-season availability."
+    },
+    {
+      "itemId": 251786,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=251786/ever-collapsing-void-fissure",
+      "reason": "Tooltip confirms acquisition through Tier 11 Delves. This display category is not a claim of exclusive acquisition or current-season availability."
+    },
+    {
+      "itemId": 280376,
+      "originTypes": [
+        "world"
+      ],
+      "drop": {
+        "sourceType": "World",
+        "instance": "The Coiled Isle",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=280376/shadow-shard-sliver?bonus=12817%3A41",
+      "supportingSourceUrls": [
+        "https://www.wowhead.com/quest=93340/the-shadow-shard"
+      ],
+      "reason": "Dropped-by table identifies outdoor rares on The Coiled Isle; also a quest reward. No single boss is implied."
+    },
+    {
+      "itemId": 193701,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Algeth'ar Academy",
+        "encounter": "Echo of Doragosa"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=193701/algethar-puzzle-box",
+      "reason": "Item tooltip identifies the drop boss; linked dungeon guide identifies the instance."
+    },
+    {
+      "itemId": 241340,
+      "originTypes": [
+        "crafting"
+      ],
+      "drop": {
+        "sourceType": "Crafting",
+        "instance": "Alchemy",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.icy-veins.com/wow/professions-alchemy/",
+      "reason": "Alchemy profession guide identifies the crafted trinket."
+    },
+    {
+      "itemId": 246304,
+      "originTypes": [
+        "crafting"
+      ],
+      "drop": {
+        "sourceType": "Crafting",
+        "instance": "Inscription",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/professions/inscription-overview-trainer-locations-recipes-tools",
+      "reason": "Listed in the Inscription recipes table."
+    },
+    {
+      "itemId": 246305,
+      "originTypes": [
+        "crafting"
+      ],
+      "drop": {
+        "sourceType": "Crafting",
+        "instance": "Inscription",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/professions/inscription-overview-trainer-locations-recipes-tools",
+      "reason": "Listed in the Inscription recipes table."
+    },
+    {
+      "itemId": 248583,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/classes/shaman/restoration/bis-gear",
+      "reason": "Guide identifies acquisition through Delves and the Delvers Journey."
+    },
+    {
+      "itemId": 249339,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249341,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249342,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249343,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Dreamrift",
+        "encounter": "Chimaerus"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-dreamrift-chimaerus-boss-strategy-abilities-rewards",
+      "reason": "Listed in the raid rewards guide."
+    },
+    {
+      "itemId": 249344,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249346,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249806,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "March on Quel'Danas",
+        "encounter": "Belo'ren"
+      },
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "Primary raid loot pool; a weekly reward container does not change the canonical origin."
+    },
+    {
+      "itemId": 249808,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249809,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "The Voidspire",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/raids/the-voidspire-rewards-gear-loot",
+      "reason": "Listed in the raid loot table. The boss is omitted where the extracted source does not retain its tab heading."
+    },
+    {
+      "itemId": 249810,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "March on Quel'Danas",
+        "encounter": "Midnight Falls"
+      },
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "Primary raid loot pool; a weekly reward container does not change the canonical origin."
+    },
+    {
+      "itemId": 249811,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "March on Quel'Danas",
+        "encounter": "Midnight Falls"
+      },
+      "sourceUrl": "https://www.wowhead.com/news/march-on-queldanas-raid-loot-available-early-via-delve-event-380962",
+      "reason": "Primary raid loot pool; a weekly reward container does not change the canonical origin."
+    },
+    {
+      "itemId": 250144,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Windrunner Spire",
+        "encounter": "Emberdawn"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/windrunner-spire-dungeon-overview-location-rewards",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 250223,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Maisara Caverns",
+        "encounter": "Vordaza"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/maisara-caverns-dungeon-overview-location-rewards",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 250253,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Nexus-Point Xenas",
+        "encounter": "Corewarden Nysarra"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/nexus-point-xenas-dungeon-overview-location-rewards",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 250256,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Windrunner Spire",
+        "encounter": "The Restless Heart"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/windrunner-spire-dungeon-overview-location-rewards",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 251783,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Tier 11 Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=251783/lost-idol-of-the-hashey",
+      "reason": "Item vendor data identifies the Delves reward."
+    },
+    {
+      "itemId": 251792,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/classes/shaman/restoration/bis-gear",
+      "reason": "Guide identifies acquisition through Delves and the Delvers Journey."
+    },
+    {
+      "itemId": 252411,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Skyreach",
+        "encounter": "Rukhran"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/skyreach-dungeon-overview-mythicplus",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 252420,
+      "originTypes": [
+        "dungeon"
+      ],
+      "drop": {
+        "sourceType": "Mythic+",
+        "instance": "Skyreach",
+        "encounter": "High Sage Viryx"
+      },
+      "sourceUrl": "https://www.wowhead.com/guide/midnight/skyreach-dungeon-overview-mythicplus",
+      "reason": "Dungeon loot table identifies the item and boss."
+    },
+    {
+      "itemId": 260235,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "March on Quel'Danas",
+        "encounter": "Belo'ren"
+      },
+      "sourceUrl": "https://www.wowhead.com/item=260235/umbral-plume",
+      "reason": "Item tooltip identifies the boss and transformation into Radiant Plume."
+    },
+    {
+      "itemId": 264507,
+      "originTypes": [
+        "world"
+      ],
+      "drop": {
+        "sourceType": "World",
+        "instance": "The Singularity: Stormarion Assault",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.icy-veins.com/wow/news/players-are-picking-up-four-easy-gear-upgrades-in-midnight-season-2/",
+      "reason": "Renown reward associated with an outdoor event, not a Delve boss."
+    },
+    {
+      "itemId": 268292,
+      "originTypes": [
+        "raid"
+      ],
+      "drop": {
+        "sourceType": "Raid",
+        "instance": "Sporefall",
+        "encounter": "Rotmire"
+      },
+      "sourceUrl": "https://www.wowhead.com/news/sporefall-raid-gear-has-new-stats-in-patch-12-0-7-381697",
+      "reason": "Sporefall raid loot article identifies the trinket and Rotmire."
+    },
+    {
+      "itemId": 270602,
+      "originTypes": [
+        "pvp"
+      ],
+      "drop": {
+        "sourceType": "PvP",
+        "instance": "Silvermoon City",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=270602/venomous-gladiators-badge-of-ferocity",
+      "reason": "PvP trinket sold by the Silvermoon PvP vendor."
+    },
+    {
+      "itemId": 270603,
+      "originTypes": [
+        "pvp"
+      ],
+      "drop": {
+        "sourceType": "PvP",
+        "instance": "Silvermoon City",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.wowhead.com/item=270603/venomous-gladiators-insignia-of-alacrity",
+      "reason": "PvP trinket sold by the Silvermoon PvP vendor."
+    },
+    {
+      "itemId": 274493,
+      "originTypes": [
+        "delves"
+      ],
+      "drop": {
+        "sourceType": "Delves",
+        "instance": "Delves",
+        "encounter": ""
+      },
+      "sourceUrl": "https://www.method.gg/guides/holy-priest/gearing",
+      "reason": "Author explicitly labels this item as Delve loot."
+    }
+  ]
+}

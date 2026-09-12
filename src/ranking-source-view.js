@@ -22,7 +22,6 @@ export function sourceRankings(rankings = [], source = 'unified') {
 }
 
 export function visibleTiers(rankings = [], source = 'unified') {
-  if (source === 'unified') return ['S', 'A', 'B', 'C'];
   const present = new Set(rankings.map((entry) => entry.tier));
   return SOURCE_TIER_ORDER.filter((tier) => present.has(tier));
 }

@@ -48,3 +48,56 @@ test('parsea tier, item, categoría y nota editorial desde el markup de Wowhead'
 test('rechaza una URL asignada a la spec equivocada', () => {
   assert.throws(() => parseWowheadGuideHtml(fixture, { ...guide, specName: 'Marksmanship' }), /no coincide/);
 });
+
+test('conserva autor y fecha de modificación de JSON-LD de la guía, no su captura', () => {
+  const metadata = `<script type="application/ld+json">${JSON.stringify({
+    '@context': 'https://schema.org', '@graph': [
+      { '@type': 'Person', name: 'Unrelated Person' },
+      { '@type': 'Article', url: guide.url, author: [{ '@type': 'Person', name: 'Guide Writer' }], dateModified: '2026-08-25T00:00:00Z' },
+    ],
+  })}</script>`;
+  const result = parseWowheadGuideHtml(metadata + fixture, guide);
+  assert.equal(result.author, 'Guide Writer');
+  assert.equal(result.pageUpdatedAt, '2026-08-25T00:00:00Z');
+  assert.notEqual(result.pageUpdatedAt, result.fetchedAt);
+});
+
+test('extrae meta author y una fecha Updated visible entre etiquetas HTML', () => {
+  const page = '<meta content="Writer &amp; Editor" name="author">'
+    + fixture.replace('Updated: 2026/08/21', '<span>Updated:</span> <time>2026/08/22</time>');
+  const result = parseWowheadGuideHtml(page, guide);
+  assert.equal(result.author, 'Writer & Editor');
+  assert.equal(result.pageUpdatedAt, '2026/08/22');
+});
+
+test('no confunde publisher, Person independiente o datePublished con autor y última actualización', () => {
+  const page = '<script type="application/ld+json">{"@type":"Article","publisher":{"name":"Wowhead"},"datePublished":"2026-01-01"}</script>'
+    + '<script type="application/ld+json">{"@type":"Person","name":"Comment Writer"}</script>'
+    + fixture.replace('Updated: 2026/08/21', '');
+  const result = parseWowheadGuideHtml(page, guide);
+  assert.equal(result.author, '');
+  assert.equal(result.pageUpdatedAt, '');
+});
+
+test('selecciona el artículo de la URL de la guía y tolera JSON-LD inválido', () => {
+  const page = `<script type="application/ld+json">${JSON.stringify([
+    { '@type': 'Article', url: 'https://www.wowhead.com/news/unrelated', author: 'Other Writer' },
+    { '@type': 'Article', mainEntityOfPage: { '@id': guide.url }, author: { name: 'Guide Writer' }, dateModified: '2026-08-26' },
+  ])}</script><script type="application/ld+json">{broken</script>` + fixture;
+  const result = parseWowheadGuideHtml(page, guide);
+  assert.equal(result.author, 'Guide Writer');
+  assert.equal(result.pageUpdatedAt, '2026-08-26');
+});
+
+test('ignora un artículo único cuya URL pertenece a otra página', () => {
+  const page = '<script type="application/ld+json">{"@type":"Article","url":"https://example.com/other","author":"Wrong Writer","dateModified":"2026-01-01"}</script>' + fixture;
+  const result = parseWowheadGuideHtml(page, guide);
+  assert.equal(result.author, '');
+  assert.equal(result.pageUpdatedAt, '2026/08/21');
+});
+
+test('admite fecha de actualización en meta y time semántico', () => {
+  const withoutDate = fixture.replace('Updated: 2026/08/21', '');
+  assert.equal(parseWowheadGuideHtml('<meta property="article:modified_time" content="2026-08-27T11:00:00Z">' + withoutDate, guide).pageUpdatedAt, '2026-08-27T11:00:00Z');
+  assert.equal(parseWowheadGuideHtml('<time itemprop="dateModified" datetime="2026-08-28">Aug 28</time>' + withoutDate, guide).pageUpdatedAt, '2026-08-28');
+});
