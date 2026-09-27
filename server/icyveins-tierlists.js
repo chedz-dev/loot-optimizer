@@ -92,32 +92,48 @@ function parseItemMarkup(markup, tier, displayOrder, noteMarkup = null) {
   };
 }
 
+// Conserva cada entrada desplegable, incluso cuando comparte un li con otras.
 function parseRowItems(row, tier) {
   const candidates = [];
   const listRanges = [];
   const listPattern = /<li\b[^>]*>([\s\S]*?)(?=<li\b|<\/ul>)/gi;
+
   for (const listMatch of row.matchAll(listPattern)) {
     const start = listMatch.index;
     const end = start + listMatch[0].length;
     listRanges.push({ start, end });
-    const detailsMatch = listMatch[1].match(/<details\b[^>]*class="[^"]*\blist-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/i);
-    if (detailsMatch) {
-      const details = detailsMatch[1];
-      const summaryMatch = details.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
-      if (!summaryMatch) continue;
-      const noteMarkup = details.slice((summaryMatch.index || 0) + summaryMatch[0].length);
-      candidates.push({ start, markup: summaryMatch[1], noteMarkup });
+    const detailsMatches = [...listMatch[1].matchAll(/<details\b[^>]*class="[^"]*\blist-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/gi)];
+
+    if (detailsMatches.length) {
+      for (const detailsMatch of detailsMatches) {
+        const details = detailsMatch[1];
+        const summaryMatch = details.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
+
+        if (!summaryMatch) {
+          throw new Error(`Una entrada desplegable de la tier ${tier} no tiene encabezado`);
+        }
+
+        const noteMarkup = details.slice((summaryMatch.index || 0) + summaryMatch[0].length);
+        candidates.push({ start: start + detailsMatch.index, markup: summaryMatch[1], noteMarkup });
+      }
     } else {
       candidates.push({ start, markup: listMatch[1], noteMarkup: null });
     }
   }
 
   const detailsPattern = /<details\b[^>]*class="[^"]*\blist-item\b[^"]*"[^>]*>([\s\S]*?)<\/details>/gi;
+
   for (const detailsMatch of row.matchAll(detailsPattern)) {
-    if (listRanges.some((range) => detailsMatch.index >= range.start && detailsMatch.index < range.end)) continue;
+    if (listRanges.some((range) => detailsMatch.index >= range.start && detailsMatch.index < range.end)) {
+      continue;
+    }
+
     const details = detailsMatch[1];
     const summaryMatch = details.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i);
-    if (!summaryMatch) continue;
+    if (!summaryMatch) {
+      throw new Error(`Una entrada desplegable de la tier ${tier} no tiene encabezado`);
+    }
+
     const noteMarkup = details.slice((summaryMatch.index || 0) + summaryMatch[0].length);
     candidates.push({ start: detailsMatch.index, markup: summaryMatch[1], noteMarkup });
   }
@@ -129,7 +145,10 @@ function parseRowItems(row, tier) {
       item: parseItemMarkup(candidate.markup, tier, index + 1, candidate.noteMarkup),
     }));
   const unresolved = parsed.filter(({ candidate, item }) => !item && /data-wowhead="item=\d+/i.test(candidate.markup));
-  if (unresolved.length) throw new Error(`No se pudieron interpretar ${unresolved.length} entradas de la tier ${tier}`);
+  if (unresolved.length) {
+    throw new Error(`No se pudieron interpretar ${unresolved.length} entradas de la tier ${tier}`);
+  }
+
   return parsed
     .flatMap(({ item }) => item ? [item] : [])
     .map((item, index) => ({ ...item, displayOrder: index + 1 }));

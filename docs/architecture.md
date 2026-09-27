@@ -2,7 +2,7 @@
 
 Revisión: 2026-09-07. Estado descrito: implementación del workspace local, no confirmación de despliegue. Documento de entrada para mantener o extender la aplicación.
 
-Documentos relacionados: [decisiones de diseño](design-decisions.md), [ranking](ranking-methodology.md), [operación WCL](warcraftlogs-cache.md).
+Documentos relacionados: [decisiones de diseño](design-decisions.md), [ranking](ranking-methodology.md), [operación WCL](warcraftlogs-cache.md), [deploy y contrato público](deployment.md).
 
 ## Alcance y límites del producto
 
@@ -176,15 +176,15 @@ Las cards editoriales comparten `EditorialItemCard`: descripción dentro del rec
 
 ## Publicación estática y seguridad
 
-`generate-static-data.js` lee la base editorial, no consulta WCL y no descarga guías por sí mismo. Produce catálogo, sources, demo, ambas tierlists, un ranking por item del catálogo y manifest. `data-client.js` soporta esas rutas concretas y rechaza operaciones de escritura en modo estático. No basta con añadir un endpoint Node para que exista en Pages.
+`generate-static-data.js` lee la base editorial, no consulta WCL y no descarga guías por sí mismo. Produce catálogo, ambas tierlists, un ranking público por item del catálogo y manifest. No produce `sources.json` ni `demo.json`. `data-client.js` soporta las rutas de lectura de catálogo, tierlists y ranking por item, y rechaza escrituras o rutas sin exportación. No basta con añadir un endpoint Node para que exista en Pages. El contrato de campos, banderas, límites de seguridad y procedimiento operativo se mantiene en [la guía de deploy](deployment.md), revisada el 2026-09-11.
 
-El workflow `deploy-pages.yml` ejecuta sincronización editorial antes del build y publicación. Restaura dependencias, no el último JSON editorial de una ejecución anterior. Un error de sincronización puede impedir que continúe el job. Existe `vercel.json` y un adaptador `api/index.js`, pero la configuración presente no valida persistencia WCL ni trabajos largos en serverless: no es el objetivo operativo de esta revisión.
+El workflow `deploy-pages.yml` separa `prepare-data`, `build` y `deploy`. `prepare-data` valida una base del caché compatible o del repositorio; solo intenta sincronizar en cron o con `refresh_data`. La sincronización escribe una copia aislada y se descarta completa si falla o resulta incoherente. `build` consume el artefacto seleccionado con `EDITORIAL_DATA_PATH`, sin acceso a guías, y solo promueve el respaldo tras pasar tests y controles estáticos. Si no existe una base válida, se bloquea el proceso. La antigüedad y los fallos se registran en Actions, no en la web. Ver [deploy](deployment.md) para caché, primera ejecución y límites. Existe `vercel.json` y un adaptador `api/index.js`, pero la configuración presente no valida persistencia WCL ni trabajos largos en serverless: no es el objetivo operativo de esta revisión.
 
 Las credenciales WCL se cargan desde `.env` en backend; `.env.example` permanece vacío. `.env`, variantes privadas y `data/warcraftlogs/` se ignoran; `.env.example` y `.env.github` son excepciones expresas y deben permanecer sin secretos. No usar variables `VITE_*` para credenciales, pues se destinan al cliente.
 
 El router WCL exige conexión loopback y, si hay `Origin`, origen HTTP(S) loopback. Envía `Cache-Control: no-store` para evitar respuestas HTTP obsoletas; esto no desactiva la base JSON. No hay autenticación multiusuario ni autorización por rol. El servidor Express general no queda limitado a localhost por este middleware: solo las rutas WCL llevan esa restricción. No exponerlo mediante túneles o proxies como si fuera una frontera de seguridad para Internet.
 
-`scripts/check-secrets.js` comprueba la plantilla, credenciales locales conocidas contra archivos versionados, cambios staged y assets públicos. Se ejecuta en prebuild/postbuild de los scripts del paquete. Ejecutar Vite directamente no ejecuta esos hooks. La comprobación no es un escáner universal de secretos ni una auditoría completa del historial Git.
+`scripts/check-secrets.js` comprueba la plantilla, credenciales locales conocidas contra archivos versionados, cambios staged y assets públicos. Está declarado en prebuild/postbuild del paquete; verificar que el gestor ejecuta esos hooks y usar el comando explícito durante la revisión. Ejecutar Vite directamente no ejecuta esos hooks. La comprobación no es un escáner universal de secretos ni una auditoría completa del historial Git.
 
 ## Operación local y diagnóstico
 

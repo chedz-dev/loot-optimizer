@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: '17 * * * *'
   workflow_dispatch:
+    inputs:
+      refresh_data:
+        description: 'Attempt guide refresh before publishing (fallback to validated data on source failure)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -17,8 +22,12 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
+  prepare-data:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    outputs:
+      cache_save: ${{ steps.prepare.outputs.cache_save }}
+      cache_key: ${{ steps.cache.outputs.cache-primary-key }}
     steps:
       - uses: actions/checkout@v6
       - uses: pnpm/action-setup@v4
@@ -29,7 +38,47 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm sync:data
+      - uses: actions/cache/restore@v5
+        id: cache
+        with:
+          path: .ci/editorial-validated.json
+          key: editorial-v1-${{ hashFiles('data/editorial-data.json', 'server/*.js', 'scripts/editorial-release.js', 'pnpm-lock.yaml') }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: |
+            editorial-v1-${{ hashFiles('data/editorial-data.json', 'server/*.js', 'scripts/editorial-release.js', 'pnpm-lock.yaml') }}-
+      - name: Select validated editorial data
+        id: prepare
+        run: node scripts/prepare-editorial-release.js
+        env:
+          REFRESH_EDITORIAL: ${{ github.event_name == 'schedule' || (github.event_name == 'workflow_dispatch' && inputs.refresh_data) }}
+      - run: node scripts/check-secrets.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: editorial-release
+          path: .ci/release/
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 7
+
+  build:
+    runs-on: ubuntu-latest
+    needs: prepare-data
+    env:
+      EDITORIAL_DATA_PATH: .ci/release/editorial-data.json
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          name: editorial-release
+          path: .ci/release/
+      - run: node scripts/check-secrets.js
       - run: pnpm test
       - run: pnpm build
         env:
@@ -37,6 +86,17 @@ jobs:
           VITE_SHOW_TECHNICAL_METADATA: 'false'
           VITE_BASE_PATH: /${{ github.event.repository.name }}/
       - run: node scripts/check-static-build.js
+      - run: node scripts/check-secrets.js
+      - name: Record selected data age
+        run: node --input-type=module -e "import fs from 'node:fs'; import {releaseSummary} from './scripts/editorial-release.js'; fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY, releaseSummary(JSON.parse(fs.readFileSync('.ci/release/report.json'))));"
+      - name: Prepare validated cache
+        if: needs.prepare-data.outputs.cache_save == 'true'
+        run: cp .ci/release/editorial-data.json .ci/editorial-validated.json
+      - uses: actions/cache/save@v5
+        if: needs.prepare-data.outputs.cache_save == 'true'
+        with:
+          path: .ci/editorial-validated.json
+          key: ${{ needs.prepare-data.outputs.cache_key }}
       - uses: actions/configure-pages@v5
         with:
           enablement: true

@@ -52,9 +52,13 @@ Wowhead aporta nombres ES por ID; EN permanece como fallback. Notas originales y
 
 ## D08. Una aplicación, dos modos de distribución
 
+Contrato operativo y checklist: [deploy de la edición estática](deployment.md). Revisarlo antes de publicar o ampliar el conjunto de datos públicos.
+
 Estado: implementado. Local usa Node y permite operaciones; Pages consume archivos precalculados y oculta administración técnica. Un selector de proveedor en Rankings cambia la vista de evidencia sin requerir una API independiente por proveedor.
 
 La publicación estática aplica una lista explícita de campos permitidos para rankings y excluye demo, configuración de fuentes, métricas internas y datos WCL. El modo baked fuerza la ocultación técnica incluso ante una bandera contradictoria. Autor, fecha editorial, tiers, notas y procedencias se conservan. Las pruebas comparan todas las combinaciones item/spec/tier y su orden en los tres modos antes y después de la proyección.
+
+Actualización 2026-09-27: separar descarga de guías y build. Los push compilan sin sincronizar; cron o petición manual intentan renovar una copia candidata. Ante HTTP 403, timeout o incoherencia se conserva la base validada completa, sin mezclar una descarga parcial ni cambiar sus fechas. El respaldo de CI se promueve tras tests/build/validación pública. La antigüedad y el uso de fallback se advierten en Actions. Sin base válida no hay publicación; el respaldo no certifica frescura ni sustituye una auditoría visual del parser.
 
 El build baked no contiene el almacenamiento WCL ni tiene dónde conservar tokens o ejecutar jobs locales. Incorporar popularidad a Pages requerirá una exportación agregada deliberada, cobertura visible, política de privacidad y generación segura. No se debe copiar `data/warcraftlogs/` a `public`.
 

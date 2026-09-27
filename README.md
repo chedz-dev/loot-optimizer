@@ -1,103 +1,113 @@
 # Loot Council Optimizer
 
-Aplicación React y Node.js para comparar trinkets por clase y especialización usando señales normalizadas de Wowhead e Icy Veins, y consultar popularidad de Warcraft Logs en la versión local.
+Una aplicación en React y Node.js para comparar trinkets de World of Warcraft. Selecciona un item y revisa qué clases y specs lo recomiendan, usando las guías de Wowhead e Icy Veins.
 
-## Documentación técnica
+El ranking se puede consultar por fuente o con ambas combinadas. También hay una sección para ver la tierlist de cada guía, sus notas y el origen de los trinkets.
 
-Revisión de diseño y arquitectura: 2026-09-07, contrastada con el código local. No implica que estos cambios estén desplegados en GitHub Pages.
-
-- [Arquitectura, flujos, modelo de datos y operación](docs/architecture.md).
-- [Decisiones de diseño, invariantes y extensión a nuevas fuentes](docs/design-decisions.md).
-- [Metodología del ranking y límites estadísticos](docs/ranking-methodology.md).
-- [Base JSON de Warcraft Logs: API, actualización y recuperación](docs/warcraftlogs-cache.md).
-
-## Modelo de datos
-
-La fuente de verdad editorial es `data/editorial-data.json`. Warcraft Logs utiliza una base separada en `data/warcraftlogs/`, con un JSON por muestra y archivos de control. No se requiere SQLite ni otro gestor de base de datos. `public/data` es una salida regenerable para el build estático, no la base de captura.
-
-El documento conserva:
-
-- catálogo canónico de items y procedencia;
-- último snapshot válido de cada guía;
-- señales normalizadas por item, clase, spec, contenido y fuente;
-- metadata de caché y versión del esquema.
-
-Los snapshots se actualizan de forma atómica. Si un parser falla, se conserva el último snapshot válido para esa guía.
-
-## Motor de ranking
-
-Las fuentes editoriales activas son Wowhead e Icy Veins con peso configurado de 50% cada una. Los tiers se normalizan a una escala de producto de 0 a 100. El motor renormaliza los pesos entre fuentes observadas: una recomendación S en una sola guía sigue siendo S, con cobertura de 50% y la otra fuente como `NR`, sin imputarle una valoración negativa. Una spec sin recomendación inequívoca no aparece. El consenso D, F o G conserva su tier.
-
-El motor distingue cobertura, desacuerdo y sensibilidad al retirar una fuente. Los tiers contradictorios de una misma fuente se muestran como evidencia ambigua hasta identificar su variante. Las señales duplicadas no aumentan su peso. El registro deja preparados Bloodmallet, Maxroll, Method.gg y Liquid Armory. Warcraft Logs está integrado como popularidad local, separado del tier editorial. Las decisiones, límites y referencias están en [la metodología del ranking](docs/ranking-methodology.md).
+La versión local incluye Warcraft Logs para consultar los trinkets más usados por el top 100 de cada spec. Estos datos se muestran aparte del ranking de las guías.
 
 ## Ejecutar localmente
 
-Entorno recomendado y utilizado en CI: Node.js 24 y pnpm 10. `package.json` declara Node.js >=22.5.
+Usar Node.js 24 y pnpm 10, las mismas versiones que usa el deploy.
 
 ```powershell
 pnpm install
 pnpm dev
 ```
 
-Cliente: `http://localhost:5173`  
-API local: `http://localhost:3001`
+El frontend abre en `http://localhost:5173` y la API en `http://localhost:3001`.
 
-Para servir el frontend compilado y la API desde `http://localhost:3001`, sin reinicios automáticos durante una revisión:
+Para servir la aplicación compilada y la API desde el mismo puerto:
 
 ```powershell
 node node_modules/vite/bin/vite.js build
-node server/index.js
+pnpm start
 ```
 
-Mantener el proceso Node abierto. Un build de Vite no levanta el servidor. Tras recompilar sin HMR, recargar la pestaña. Ver [diagnóstico de conexión](docs/architecture.md#operación-local-y-diagnóstico).
+Abrir `http://localhost:3001` y dejar el proceso de Node en ejecución. Si se vuelve a compilar el frontend, hay que recargar la página para ver los cambios.
 
-Actualizar las fuentes y regenerar las vistas estáticas:
+## Cómo funciona el ranking
+
+Por ahora, el ranking unificado usa Wowhead e Icy Veins con el mismo peso. Si las dos fuentes tienen una recomendación para la spec, se combinan sus valoraciones. Si solo aparece en una, se usa esa recomendación sin penalizarla por faltar en la otra.
+
+Por ejemplo, si un trinket es S para una spec en Wowhead y no aparece en Icy Veins, se mantiene en S. Si no hay una recomendación clara en ninguna fuente, la spec no se muestra.
+
+Las recomendaciones duplicadas no suman peso. Si una misma guía asigna distintos tiers al mismo item y no se puede distinguir a qué variante corresponde cada uno, el motor lo marca como ambiguo.
+
+La popularidad de Warcraft Logs no modifica este ranking. Que un trinket sea muy usado no significa que sea el mejor para todas las situaciones.
+
+Los pesos, cálculos y casos especiales están en la [documentación del ranking](docs/ranking-methodology.md).
+
+## Base de datos y actualización
+
+La información se guarda en JSON. No hace falta instalar un gestor de base de datos.
+
+- `data/editorial-data.json`: items, origen, tierlists y recomendaciones de Wowhead e Icy Veins.
+- `data/warcraftlogs/`: capturas y resultados de Warcraft Logs. Esta carpeta es local y no se sube a Git.
+- `public/data/`: archivos generados para la versión estática. No se editan directamente.
+
+Para actualizar las guías:
 
 ```powershell
 pnpm sync:data
+```
+
+Si falla el parseo de una guía, se conserva su última captura válida. Para regenerar los archivos públicos y compilar el frontend:
+
+```powershell
 pnpm build
 ```
 
-## Archivos estáticos
+Este comando no consulta las guías. Tampoco activa por sí solo el modo estático: sin `VITE_STATIC_DATA=true`, el frontend sigue usando la API local.
 
-`scripts/generate-static-data.js` genera en `public/data`:
+## Warcraft Logs
 
-- catálogo;
-- tierlists de Wowhead e Icy Veins;
-- ranking precalculado para cada trinket;
-- manifest con versión del esquema y rutas de los archivos públicos.
+Las credenciales van en `.env`. El archivo `.env.example` solo sirve de plantilla y debe quedarse sin credenciales reales. El servidor gestiona la conexión con Warcraft Logs; el navegador no recibe las credenciales ni el token.
 
-React usa la API local normalmente. Con `VITE_STATIC_DATA=true` consume esos archivos directamente, sin Express.
+El módulo permite elegir zona, boss o dungeon, dificultad, partición y spec. Usa los primeros 100 puestos del ranking por encuentro: DPS para daño y tanks, HPS para healers y `playerscore` para Mythic+.
 
-Los JSON públicos excluyen puntuaciones internas, pesos, diagnósticos de ranking, estado de credenciales y snapshots. No se exportan demo, roster ni caché WCL. Se conservan tiers, orden, notas, procedencia, autor y actualización editorial. `node scripts/check-static-build.js` valida el artefacto antes de publicarlo.
+La popularidad se calcula sobre los personajes que tienen información válida de ambos trinkets. Se eliminan personajes duplicados y no se buscan puestos inferiores al 100 para completar datos ausentes. Como cada personaje lleva dos trinkets, los porcentajes de todos los items pueden sumar 200%.
 
-## GitHub Pages
+Navegar y cambiar filtros solo lee la base local, sin hacer llamadas a la API. Las actualizaciones se solicitan desde el panel local o por comando. El caché dura una hora: durante una actualización se omiten las capturas que todavía están vigentes. Al vencer esa hora no se descarga nada automáticamente.
 
-El workflow `.github/workflows/deploy-pages.yml` está configurado para ejecutarse al hacer push a `main`, manualmente o por cron `17 * * * *`. Ejecuta `pnpm sync:data`, genera los JSON editoriales, compila Vite y publica `dist`. El cron es una programación del workflow, no una garantía de actualización exacta ni un refresco del navegador.
+Por defecto se muestran trinkets de la temporada actual. También se pueden consultar temporadas anteriores y los items cuya temporada está pendiente de confirmar.
 
-En el repositorio de GitHub se debe seleccionar `Settings > Pages > Source > GitHub Actions`.
+La [documentación de Warcraft Logs](docs/warcraftlogs-cache.md) incluye los comandos para revisar, actualizar y recuperar la base.
 
-El workflow configura automáticamente:
+## Versión estática y GitHub Pages
 
-- `VITE_STATIC_DATA=true`;
-- `VITE_SHOW_TECHNICAL_METADATA=false`;
-- la ruta base `/<nombre-del-repositorio>/`;
-- caché de dependencias pnpm mediante `setup-node`, no de la base editorial.
+La versión de GitHub Pages usa los rankings y tierlists generados en `public/data`, sin un servidor Node.js. Conserva las notas, el origen de los items, el autor y la fecha de actualización de las guías. No muestra paneles de administración, métricas internas ni el módulo de Warcraft Logs.
 
-Actualmente no hay un paso para restaurar/guardar `editorial-data.json` entre ejecuciones de CI. Se parte del archivo versionado en el checkout y la sincronización modifica la copia de trabajo del runner. El workflow no hace commit de esas capturas. Warcraft Logs no se sincroniza ni se publica en este build; una futura integración con CI requeriría un diseño adicional y secretos del entorno, nunca credenciales en JSON públicos.
+El workflow de deploy se ejecuta al hacer push a `main`, de forma manual o mediante una tarea programada cada hora:
 
-## Warcraft Logs local
+- Un push publica con los datos guardados, después de validarlos, sin consultar las guías.
+- La tarea programada intenta actualizar las guías. En una ejecución manual se puede activar `refresh_data` para hacer lo mismo.
+- Si falla la actualización, se descartan los cambios parciales y se usa la base completa de respaldo. El resumen de Actions muestra el error y la antigüedad de los datos.
+- Si no hay una base válida, o fallan las pruebas o el build, no se publica.
 
-Las credenciales reales van exclusivamente en `.env`, que está ignorado por Git. `.env.example` es una plantilla con campos vacíos. El servidor obtiene un token OAuth de la API oficial y lo conserva solamente en memoria. React no recibe las credenciales ni el token. `pnpm check:secrets` revisa la plantilla, los archivos versionados, los cambios preparados y los assets públicos antes y después del build.
+Si todavía no existe un respaldo en caché, se usa el JSON del repositorio. Puede ser más antiguo que los datos publicados, así que conviene revisar las fechas antes del primer deploy. La tarea programada tampoco garantiza datos nuevos cada hora: depende de que las fuentes respondan y de que GitHub ejecute el trabajo.
 
-El módulo Warcraft Logs aparece solo en la versión local. Permite seleccionar zona activa, boss o dungeon, dificultad, partición y spec. Descubre los IDs y slugs en la API y usa los primeros 100 puestos del ranking mundial por encuentro. Para raid usa DPS en daño/tanks y HPS en healers; para Mythic+ usa `playerscore`. Es una medición de uso, no una estimación de mejora de DPS ni una recomendación BiS.
+En GitHub, seleccionar `Settings > Pages > Source > GitHub Actions`. El workflow configura `VITE_STATIC_DATA=true`, `VITE_SHOW_TECHNICAL_METADATA=false` y la ruta base del repositorio. Solo publica la carpeta `dist`.
 
-Popularidad = personajes que equipan el trinket / personajes del top con ambos slots de trinket válidos. Se eliminan personajes duplicados y se informa del equipo ausente. No se reemplazan los registros sin equipo por puestos inferiores al 100. Los dos slots se cuentan individualmente, por lo que los porcentajes de todos los items pueden sumar 200%. Se combinan niveles de objeto del mismo ID y se muestra su nivel medio.
+Para preparar un build estático local o revisar qué archivos se pueden publicar, consultar la [guía de deploy](docs/deployment.md).
 
-La base JSON se guarda bajo `data/warcraftlogs/`, ignorada por Git. Navegar, filtrar o abrir una spec consulta exclusivamente los JSON, incluso si están caducados o no hay credenciales. La vigencia de una hora solo decide qué capturas omite una actualización explícita; no activa descargas automáticas. El panel Base JSON local muestra cobertura, antigüedad y un plan de consultas antes de actualizar. Conserva el top 100 original completo recibido de WCL y sus resultados derivados, con escrituras atómicas, respaldo, bloqueo entre procesos y trabajos reanudables. Las capturas anteriores a este cambio siguen siendo consultables, pero necesitan una actualización explícita para incorporar los datos originales. Consulta [operación de la base WCL](docs/warcraftlogs-cache.md) para los comandos y límites.
+## Pruebas
 
-Las dos vistas WCL filtran por temporada: actual por defecto, anteriores, todos o sin clasificar. La selección se recuerda. Se consulta el catálogo activo y un registro JSON de evidencia, sin deducir la temporada por la antigüedad del ID ni por el nivel de objeto. Los trinkets antiguos que regresan pueden seguir siendo actuales; los casos sin confirmar quedan separados. Filtrar no cambia porcentajes ni borra capturas. Véase [clasificación de temporada](docs/warcraftlogs-cache.md#temporada-de-los-trinkets).
+```powershell
+pnpm test
+pnpm check:secrets
+```
 
-Las señales siguen el contrato común (`source`, `itemId`, clase, spec, contexto, muestra, fecha), con tipo `usage-rate`. Se mantienen separadas del peso editorial por defecto; la frecuencia de uso no demuestra que un item sea óptimo. El build estático no publica las capturas de Warcraft Logs.
+Después de generar un build estático, revisar también su contenido:
 
-Referencias: [API Warcraft Logs](https://www.warcraftlogs.com/api/docs), [consultas de rankings por encuentro](https://www.warcraftlogs.com/v2-api-docs/warcraft/encounter.doc.html), [rankings y parses](https://www.warcraftlogs.com/help/ranks/), [metodología de Archon](https://www.archon.gg/wow/articles/help/archon-disclaimers-and-faq). Archon usa una muestra distinta; esta aplicación identifica explícitamente su top 100 por encuentro.
+```powershell
+node scripts/check-static-build.js
+```
+
+## Documentación
+
+- [Arquitectura y modelo de datos](docs/architecture.md).
+- [Decisiones de diseño](docs/design-decisions.md).
+- [Algoritmo de ranking](docs/ranking-methodology.md).
+- [Base local de Warcraft Logs](docs/warcraftlogs-cache.md).
+- [Build estático y deploy](docs/deployment.md).

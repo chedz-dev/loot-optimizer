@@ -16,28 +16,39 @@ const forbiddenKeys = new Set([
   'weight', 'effectiveWeight', 'configuredWeight', 'contribution', 'sampleSize',
   'rawRankings', 'accessToken', 'clientSecret', 'credentials', 'apiCalls', 'rateLimit',
 ]);
+// Recorre los datos anidados para impedir que se publiquen campos privados.
 function checkKeys(value, location) {
-  if (!value || typeof value !== 'object') return;
+  if (!value || typeof value !== 'object') {
+    return;
+  }
+
   for (const [key, child] of Object.entries(value)) {
     assert.ok(!forbiddenKeys.has(key), `${location}.${key} is not public data`);
     checkKeys(child, `${location}.${key}`);
   }
 }
+
 const catalog = read('catalog.json');
 assert.ok(catalog.items.length > 0, 'Empty item catalog');
 const expected = ['catalog.json', 'manifest.json', 'tierlists/wowhead.json', 'tierlists/icyveins.json',
   ...catalog.items.map((item) => `rankings/${item.id}.json`)];
 assert.deepEqual(filesIn(dataDirectory).sort(), expected.sort(), 'Unexpected or missing public data file');
-for (const filename of expected) checkKeys(read(filename), filename);
+for (const filename of expected) {
+  checkKeys(read(filename), filename);
+}
+
 for (const item of catalog.items) {
   const result = read(`rankings/${item.id}.json`);
   assert.deepEqual(result, publicRankings(result), `Private ranking fields: ${item.id}`);
 }
+
 let guideCount = 0;
+
 for (const source of ['wowhead', 'icyveins']) {
   const payload = read(`tierlists/${source}.json`);
   assert.deepEqual(Object.keys(payload).sort(), ['guides', 'source']);
   assert.ok(payload.guides.length > 0, `No guides for ${source}`);
+
   for (const guide of payload.guides) {
     assert.deepEqual(guide, publicGuide(guide), `Private guide fields: ${guide.id}`);
     assert.ok(Object.hasOwn(guide, 'author'), `Missing author field: ${guide.id}`);
@@ -45,8 +56,10 @@ for (const source of ['wowhead', 'icyveins']) {
     guideCount++;
   }
 }
+
 for (const filename of filesIn(directory)) {
-  assert.ok(!/(^|\/)(?:\.env(?:\.|$)|server\/|warcraftlogs\/)|\.(?:sqlite|map)$/i.test(filename),
+  assert.ok(!/(^|\/)(?:\.ci\/|\.env(?:\.|$)|server\/|warcraftlogs\/)|\.(?:sqlite|map)$/i.test(filename),
     `Private file in public build: ${filename}`);
 }
+
 console.log(`Static build passed: ${catalog.items.length} rankings, ${guideCount} attributed guides, no admin payloads or internal metrics.`);

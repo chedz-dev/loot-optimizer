@@ -83,6 +83,29 @@ test('recupera todos los items cuando Icy Veins omite cierres de li', () => {
   assert.deepEqual(result.tiers[0].items.map((item) => item.displayOrder), [1, 2, 3]);
 });
 
+test('conserva varios desplegables dentro del mismo li sin convertir notas en recomendaciones', () => {
+  const grouped = fixture.replace(/<ul>[\s\S]*?<\/ul>/, `<ul><li>
+    <details class="list-item"><summary><span data-wowhead="item=270175" class="q4">Voracious Heart of Ula'tek</span></summary><p>Best on-use</p></details>
+    <details class="list-item"><summary><span data-wowhead="item=270173" class="q4">Zul'jin's Guillotine Technique</span></summary><p>Best passive with <span data-wowhead="item=268213" class="q4">Maze-roa</span></p></details>
+    </li><li><span data-wowhead="item=250214" class="q3">Lightspire Core</span></li></ul>`);
+  const parsed = parseIcyVeinsGuideHtml(grouped, guide);
+
+  assert.deepEqual(parsed.tiers[0].items.map(item => item.itemId), [270175, 270173, 250214]);
+  assert.deepEqual(parsed.tiers[0].items.map(item => item.displayOrder), [1, 2, 3]);
+  assert.equal(parsed.tiers[0].items[0].guideNote, 'Best on-use');
+  assert.equal(parsed.tiers[0].items[1].guideNote, 'Best passive with Maze-roa');
+
+  const store = createEditorialStore();
+  saveGuideSnapshot('icyveins', parsed, store);
+  assert.equal(getRankingSignalsForItem(270173, store)[0].textValue, 'S');
+});
+
+test('rechaza un desplegable sin encabezado en vez de omitirlo', () => {
+  const malformed = fixture.replace(/<ul>[\s\S]*?<\/ul>/, '<ul><li><details class="list-item"><span data-wowhead="item=270173" class="q4">Zuljin</span></details></li></ul>');
+
+  assert.throws(() => parseIcyVeinsGuideHtml(malformed, guide), /no tiene encabezado/);
+});
+
 test('captura el comentario aunque el item no use spell_icon_span', () => {
   const compactFixture = fixture.replace(
     `<span class="spell_icon_span"><img class="spell_icon" src="//static.icy-veins.com/images/wow/large_icons/inv_alchemy_90_flask_red.jpg" alt="Freightrunner's Flask Icon" /> <span data-wowhead="item=250215" class="q3">Freightrunner's Flask</span></span> &mdash; Best on-use Trinket`,
