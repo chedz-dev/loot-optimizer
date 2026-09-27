@@ -8,6 +8,8 @@ import { localizedItemName } from '../item-localization.js';
 import { itemOriginLocation, resolveItemOrigin } from '../item-origin.js';
 import { ITEM_SEASON_FILTERS, filterItemsBySeason, itemSeasonStatus, normalizeItemSeasonFilter, selectVisibleSeasonItem } from '../item-season-filter.js';
 import { usePersistentState } from '../use-persistent-state.js';
+import { isStaticBuild } from '../build-mode.js';
+import { selectStaticWclContext } from '../warcraftlogs-static.js';
 import './warcraftlogs-popularity.css';
 
 async function fetchJson(url, options) {
@@ -102,7 +104,9 @@ export default function WarcraftLogsPopularity({ active }) {
   }, [active, retry, revision]);
 
   useEffect(() => {
-    if (!active) return undefined;
+    if (!active || isStaticBuild) {
+      return undefined;
+    }
     const controller = new AbortController();
     setCacheError('');
     fetchJson('/api/warcraftlogs/cache', { signal: controller.signal }).then((payload) => {
@@ -112,13 +116,14 @@ export default function WarcraftLogsPopularity({ active }) {
     return () => controller.abort();
   }, [active, retry, revision]);
 
-  const zone = choose(catalog?.zones, selection?.zoneId, catalog?.defaultContext?.zoneId);
+  const bakedContext = isStaticBuild ? selectStaticWclContext(catalog?.contexts, selection) : null;
+  const zone = choose(catalog?.zones, bakedContext?.zoneId ?? selection?.zoneId, catalog?.defaultContext?.zoneId);
   const useDefaults = sameId(zone?.id, catalog?.defaultContext?.zoneId);
-  const encounter = choose(zone?.encounters, selection?.encounterId, useDefaults ? catalog?.defaultContext?.encounterId : undefined);
+  const encounter = choose(zone?.encounters, bakedContext?.encounterId ?? selection?.encounterId, useDefaults ? catalog?.defaultContext?.encounterId : undefined);
   const defaultDifficulty = useDefaults ? catalog?.defaultContext?.difficulty
     : zone?.difficulties?.find((entry) => entry.name?.toLowerCase() === 'mythic')?.id;
-  const difficulty = choose(zone?.difficulties, selection?.difficulty, defaultDifficulty);
-  const partition = choose(zone?.partitions, selection?.partition, useDefaults ? catalog?.defaultContext?.partition : undefined);
+  const difficulty = choose(zone?.difficulties, bakedContext?.difficulty ?? selection?.difficulty, defaultDifficulty);
+  const partition = choose(zone?.partitions, bakedContext?.partition ?? selection?.partition, useDefaults ? catalog?.defaultContext?.partition : undefined);
   const contextQuery = useMemo(() => {
     if (!zone || !encounter) return '';
     return new URLSearchParams({ zoneId: zone.id, encounterId: encounter.id, difficulty: difficulty?.id ?? 0, partition: partition?.id ?? 0 }).toString();
@@ -150,7 +155,9 @@ export default function WarcraftLogsPopularity({ active }) {
   const plan = planResult?.key === syncQuery ? planResult.data : null;
 
   useEffect(() => {
-    if (!active || !syncQuery) return undefined;
+    if (!active || !syncQuery || isStaticBuild) {
+      return undefined;
+    }
     const controller = new AbortController();
     setPlanError('');
     fetchJson(`/api/warcraftlogs/sync/plan?${syncQuery}`, { signal: controller.signal }).then((payload) => {
@@ -182,7 +189,9 @@ export default function WarcraftLogsPopularity({ active }) {
     fetchJson(`/api/warcraftlogs/items?${contextQuery}`, { signal: controller.signal }).then((payload) => {
       setItemCatalog({ key: contextQuery, data: payload });
     }).catch((error) => {
-      if (!controller.signal.aborted) setRequestError({ key: contextQuery, message: error.message });
+      if (!controller.signal.aborted) {
+        setRequestError({ key: contextQuery, message: error.message, code: error.code });
+      }
     }).finally(() => {
       if (!controller.signal.aborted) setLoadingKey('');
     });
@@ -196,13 +205,17 @@ export default function WarcraftLogsPopularity({ active }) {
     fetchJson(`/api/warcraftlogs/item?${itemKey}`, { signal: controller.signal }).then((payload) => {
       setItemResult({ key: itemKey, data: payload });
     }).catch((error) => {
-      if (!controller.signal.aborted) setRequestError({ key: itemKey, message: error.message });
+      if (!controller.signal.aborted) {
+        setRequestError({ key: itemKey, message: error.message, code: error.code });
+      }
     });
     return () => controller.abort();
   }, [canQuery, mode, itemKey, retry, revision]);
 
   useEffect(() => {
-    if (!active || job?.status !== 'running') return undefined;
+    if (!active || job?.status !== 'running' || isStaticBuild) {
+      return undefined;
+    }
     const controller = new AbortController();
     const timeout = window.setTimeout(() => {
       fetchJson(`/api/warcraftlogs/sync?id=${encodeURIComponent(job.id)}`, { signal: controller.signal }).then((next) => {
@@ -223,6 +236,10 @@ export default function WarcraftLogsPopularity({ active }) {
   }, [active, result, cachedCatalog, comparison, language, itemSeason]);
 
   const runCacheAction = async (url, body = {}) => {
+    if (isStaticBuild) {
+      return;
+    }
+
     setStartingSync(true);
     setSyncError('');
     try {
@@ -242,10 +259,15 @@ export default function WarcraftLogsPopularity({ active }) {
   }, [seasonItems, language, search]);
   const syncBusy = startingSync || job?.status === 'running';
   const errorKeys = mode === 'spec' ? [specKey] : [contextQuery, itemKey];
-  const error = requestError && errorKeys.includes(requestError.key) ? (requestError.code === 'CACHE_MISS' ? t('wcl.cacheMiss') : requestError.message) : '';
+  const error = requestError && errorKeys.includes(requestError.key) ? (requestError.code === 'CACHE_MISS' ? t(isStaticBuild ? 'wcl.bakedMissing' : 'wcl.cacheMiss') : requestError.message) : '';
   const formatDate = (value) => value ? new Date(value).toLocaleString(language === 'es' ? 'es-MX' : 'en-US', { dateStyle: 'short', timeStyle: 'short' }) : '-';
   const metricName = (metric) => metric === 'playerscore' ? t('wcl.metric.playerscore') : String(metric || '').toUpperCase();
   const updateContext = (key, value) => setSelection({ zoneId: zone?.id, encounterId: encounter?.id, difficulty: difficulty?.id, partition: partition?.id, [key]: value });
+  const bakedDifficulties = zone?.difficulties?.filter(entry => catalog?.contexts?.some(context =>
+    sameId(context.zoneId, zone.id) && sameId(context.encounterId, encounter?.id) && sameId(context.difficulty, entry.id)));
+  const bakedPartitions = zone?.partitions?.filter(entry => catalog?.contexts?.some(context =>
+    sameId(context.zoneId, zone.id) && sameId(context.encounterId, encounter?.id)
+    && sameId(context.difficulty, difficulty?.id) && sameId(context.partition, entry.id)));
   const contextCoverage = cache?.contexts?.find((entry) => {
     const saved = entry.context || entry;
     return sameId(saved.zoneId, zone?.id) && sameId(saved.encounterId, encounter?.id)
@@ -258,14 +280,15 @@ export default function WarcraftLogsPopularity({ active }) {
     : (job?.status === 'running' ? 'wcl.syncing' : job?.status === 'interrupted' ? 'wcl.syncInterrupted' : job?.status === 'failed' ? 'wcl.syncFailed' : 'wcl.syncComplete');
 
   return <div className="spec-module wcl-module">
-    <header className="rankings-hero"><div><p className="eyebrow">{t('wcl.eyebrow')}</p><h1>{t('wcl.title')}</h1><p>{t('wcl.subtitle')}</p></div><span className="wcl-local-badge">{t('wcl.local')}</span></header>
+    <header className="rankings-hero"><div><p className="eyebrow">{t('wcl.eyebrow')}</p><h1>{t('wcl.title')}</h1><p>{t('wcl.subtitle')}</p></div><span className="wcl-local-badge">{t(isStaticBuild ? 'wcl.baked' : 'wcl.local')}</span></header>
 
     {catalogError && <div className="error-inline" role="alert">{catalogError} <button className="wcl-secondary" onClick={() => setRetry((current) => current + 1)}>{t('wcl.retry')}</button></div>}
     {!catalog && !catalogError && <div className="module-loading" role="status">{t('wcl.loading')}</div>}
-    {catalog && !catalog.configured && <div className="wcl-notice">{t('wcl.notConfigured')}</div>}
-    {catalog && !zone && <div className="wcl-notice">{t('wcl.noZones')}</div>}
+    {catalog && !isStaticBuild && !catalog.configured && <div className="wcl-notice">{t('wcl.notConfigured')}</div>}
+    {catalog && !zone && <div className="wcl-notice">{t(isStaticBuild ? 'wcl.bakedMissing' : 'wcl.noZones')}</div>}
+    {catalog && isStaticBuild && <div className="wcl-notice"><p>{t('wcl.bakedNote')}</p><p>{t('wcl.dataDates', { from: formatDate(catalog.oldestCaptureAt), to: formatDate(catalog.newestCaptureAt) })}</p></div>}
 
-    <section className="panel wcl-cache-panel">
+    {!isStaticBuild && <section className="panel wcl-cache-panel">
       <div className="panel-head"><div><h2>{t('wcl.database')}</h2><p>{t('wcl.databaseNote')}</p></div><button className="wcl-secondary" onClick={() => setRevision((current) => current + 1)} disabled={startingSync}>{t('wcl.reloadLocal')}</button></div>
       <div className="wcl-cache-stats"><div><span>{t('wcl.savedSnapshots')}</span><strong>{cache?.snapshots ?? 0}</strong></div><div><span>{t('wcl.freshSnapshots')}</span><strong>{cache?.freshSnapshots ?? 0}</strong></div><div><span>{t('wcl.staleSnapshots')}</span><strong>{cache?.staleSnapshots ?? 0}</strong></div><div><span>{t('wcl.lastUpdate')}</span><strong>{formatDate(lastUpdatedAt)}</strong></div></div>
       {zone && <p className="wcl-context-coverage"><strong>{encounter?.name} · {difficulty?.name}</strong><br />{t('wcl.coverage', { available: contextCoverage?.availableSpecs ?? 0, total: contextCoverage?.totalSpecs ?? 40 })} · {t('wcl.freshCoverage', { count: contextCoverage?.freshSpecs ?? 0 })}</p>}
@@ -283,16 +306,16 @@ export default function WarcraftLogsPopularity({ active }) {
       {job && <div className="wcl-job" role="status"><p>{t(jobStatusKey, { completed: job.completed || 0, total: job.total || 0 })}</p><progress value={job.completed || 0} max={job.total || 1} /><p>{t(isRebuildJob ? 'wcl.rebuildSummary' : 'wcl.jobSummary', { rebuilt: job.rebuilt || 0, fetched: job.fetched || 0, skipped: job.skipped || 0, queries: job.apiQueries || 0 })}</p>{job.errors?.length > 0 && <p>{t('wcl.syncErrors', { count: job.errors.length })}</p>}{job.resumable && <button className="wcl-secondary" disabled={syncBusy || (!isRebuildJob && !catalog?.configured)} onClick={() => runCacheAction(`/api/warcraftlogs/sync/${encodeURIComponent(job.id)}/resume`)}>{t('wcl.resume')}</button>}</div>}
       {(syncError || cacheError) && <p className="error-inline" role="alert">{syncError || cacheError}</p>}
       <details className="wcl-cache-maintenance"><summary>{t('wcl.maintenance')}</summary><p>{t('wcl.rebuildNote', { count: cache?.rawSnapshots ?? 0 })}</p>{cache?.legacySnapshots > 0 && <p>{t('wcl.legacySnapshots', { count: cache.legacySnapshots })}</p>}<button className="wcl-secondary" disabled={syncBusy || !cache?.rawSnapshots} onClick={() => runCacheAction('/api/warcraftlogs/rebuild')}>{t('wcl.rebuild')}</button><p>{t('wcl.apiUsage', { queries: cache?.apiUsage?.queries ?? 0, date: formatDate(cache?.apiUsage?.lastRequestAt) })}</p></details>
-    </section>
+    </section>}
 
     {zone && <>
       <section className="panel wcl-context-panel">
-        <div className="panel-head"><h2>{t('wcl.context')}</h2><span className="wcl-cache-label">{t('wcl.cached', { hours: catalog.cacheHours || 1 })}</span></div>
+        <div className="panel-head"><h2>{t('wcl.context')}</h2>{!isStaticBuild && <span className="wcl-cache-label">{t('wcl.cached', { hours: catalog.cacheHours || 1 })}</span>}</div>
         <div className="wcl-context-fields">
-          <label><span>{t('wcl.zone')}</span><select value={zone.id} onChange={(event) => setSelection({ zoneId: event.target.value })}>{catalog.zones.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
+          <label><span>{t('wcl.zone')}</span><select value={zone.id} onChange={(event) => isStaticBuild ? updateContext('zoneId', event.target.value) : setSelection({ zoneId: event.target.value })}>{catalog.zones.map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
           <label><span>{t('wcl.encounter')}</span><select value={encounter?.id ?? ''} onChange={(event) => updateContext('encounterId', event.target.value)}>{(zone.encounters || []).map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
-          <label><span>{t('wcl.difficulty')}</span><select value={difficulty?.id ?? ''} disabled={!zone.difficulties?.length} onChange={(event) => updateContext('difficulty', event.target.value)}>{(zone.difficulties || []).map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
-          <label><span>{t('wcl.partition')}</span><select value={partition?.id ?? ''} disabled={!zone.partitions?.length} onChange={(event) => updateContext('partition', event.target.value)}>{(zone.partitions || []).map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
+          <label><span>{t('wcl.difficulty')}</span><select value={difficulty?.id ?? ''} disabled={!zone.difficulties?.length} onChange={(event) => updateContext('difficulty', event.target.value)}>{((isStaticBuild ? bakedDifficulties : zone.difficulties) || []).map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
+          <label><span>{t('wcl.partition')}</span><select value={partition?.id ?? ''} disabled={!zone.partitions?.length} onChange={(event) => updateContext('partition', event.target.value)}>{((isStaticBuild ? bakedPartitions : zone.partitions) || []).map((entry) => <option key={entry.id} value={entry.id}>{entry.name}</option>)}</select></label>
         </div>
       </section>
 
@@ -318,7 +341,7 @@ export default function WarcraftLogsPopularity({ active }) {
       {mode === 'spec' && !result && loadingKey === specKey && <div className="module-loading" role="status">{t('wcl.loadingSpec')}</div>}
 
       {mode === 'spec' && result && <>
-        <div className="wcl-sample-summary"><div><span>{t('wcl.metric')}</span><strong>{metricName(result.metric)}</strong></div><div><span>{t('wcl.sample')}</span><strong>{result.rankingRows ?? result.sampledCharacters} / {result.targetSampleSize || 100}</strong></div><div><span>{t('wcl.validGear')}</span><strong>{result.validCharacters}</strong></div><div><span>{t('wcl.missingGear')}</span><strong>{result.missingGear}</strong></div><div><span>{t('wcl.duplicates')}</span><strong>{result.duplicateCharacters || 0}</strong></div><div><span>{t('wcl.invalidIdentity')}</span><strong>{result.invalidIdentity || 0}</strong></div></div>
+        <div className="wcl-sample-summary"><div><span>{t('wcl.metric')}</span><strong>{metricName(result.metric)}</strong></div><div><span>{t('wcl.sample')}</span><strong>{result.rankingRows ?? result.sampledCharacters} / {result.targetSampleSize || 100}</strong></div><div><span>{t('wcl.validGear')}</span><strong>{result.validCharacters}</strong></div>{!isStaticBuild && <><div><span>{t('wcl.missingGear')}</span><strong>{result.missingGear}</strong></div><div><span>{t('wcl.duplicates')}</span><strong>{result.duplicateCharacters || 0}</strong></div><div><span>{t('wcl.invalidIdentity')}</span><strong>{result.invalidIdentity || 0}</strong></div></>}</div>
         {result.stale && <div className="wcl-notice" role="status">{t('wcl.stale')}{result.error && <p>{result.error}</p>}</div>}
         {result.status === 'incomplete' && <div className="wcl-notice">{t('wcl.incomplete')}</div>}
         <section className="panel wcl-results" aria-busy={loadingKey === specKey}>
@@ -327,7 +350,7 @@ export default function WarcraftLogsPopularity({ active }) {
           <div className="wcl-table-head"><span>Trinket</span><span>{t('wcl.popularity')} · {t('wcl.players')}</span><span>{t('wcl.itemLevel')}</span></div>
           <div className="wcl-rows">{specSeasonItems.map((item) => <article key={item.itemId}><div className="wcl-item-identity"><ItemIcon item={item} tooltip /><div><b>{localizedItemName(item, language)}</b><ItemAcquisition item={item} currentSeason={catalog.currentItemSeason} t={t} /></div></div><Popularity entry={{ ...item, validCharacters: result.validCharacters }} language={language} t={t} /><span className="wcl-ilvl">{item.averageItemLevel == null ? '-' : Number(item.averageItemLevel).toLocaleString(language, { maximumFractionDigits: 1 })}</span></article>)}</div>
           {!specSeasonItems.length && <p className="wcl-empty">{t(result.items.length ? 'wcl.noSeasonItems' : 'wcl.noSample')}</p>}
-          <div className="wcl-freshness"><span>{t('wcl.snapshot')}: {formatDate(result.fetchedAt)}</span><span>{t('wcl.expires')}: {formatDate(result.expiresAt)}</span></div>
+          <div className="wcl-freshness"><span>{t('wcl.snapshot')}: {formatDate(result.capturedAt || result.fetchedAt)}</span>{!isStaticBuild && <span>{t('wcl.expires')}: {formatDate(result.expiresAt)}</span>}</div>
         </section>
       </>}
 

@@ -10,6 +10,7 @@ import {
 } from '../server/editorial-store.js';
 import { ICYVEINS_GUIDES, WOWHEAD_GUIDES } from '../server/guide-catalog.js';
 import { publicGuide, publicRankings } from './static-projections.js';
+import { validateWarcraftLogsStatic } from './validate-warcraftlogs-static.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const output = path.join(root, 'public', 'data');
@@ -24,6 +25,10 @@ const writeJson = (relativePath, value) => {
 
 const status = getEditorialDataStatus();
 const files = [];
+// El build conserva el baked revisado, sin leer el caché privado ni consultar WCL.
+const wclPath = path.join(output, 'warcraftlogs.json');
+validateWarcraftLogsStatic(JSON.parse(fs.readFileSync(wclPath, 'utf8')));
+files.push({ path: 'warcraftlogs.json', bytes: fs.statSync(wclPath).size });
 files.push(writeJson('catalog.json', {
   classes: classSpecs,
   items: rankingItems.map(({ profile, ...item }) => {

@@ -81,7 +81,23 @@ export function createWarcraftLogsStore({ cacheDir = null, now = Date.now, fsImp
 
   function atomicReplace(file, text) {
     const temporary = writeTemporary(text);
-    try { fsImpl.renameSync(temporary, file); syncDirectory(); }
+    try {
+      // Windows puede bloquear brevemente un archivo mientras otro proceso lo lee.
+      for (let attempt = 0; ; attempt += 1) {
+        try {
+          fsImpl.renameSync(temporary, file);
+          break;
+        } catch (error) {
+          if (attempt >= 5 || !['EPERM', 'EACCES', 'EBUSY'].includes(error.code)) {
+            throw error;
+          }
+
+          Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25 * 2 ** attempt);
+        }
+      }
+
+      syncDirectory();
+    }
     finally { try { fsImpl.unlinkSync(temporary); } catch {} }
   }
 

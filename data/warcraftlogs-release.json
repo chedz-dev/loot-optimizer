@@ -1,0 +1,9 @@
+{
+  "seasonId": "midnight-s2",
+  "zoneId": 53,
+  "partition": 1,
+  "difficulties": [4, 5],
+  "encounterIds": [3470, 3445, 3455, 3497, 3420, 3421, 3429, 3492, 3379],
+  "excludedEncounterIds": [3513],
+  "note": "VA y Nymrissa. Kith'ix queda excluido por indicación del usuario hasta su disponibilidad en retail."
+}

@@ -99,6 +99,49 @@ test('WCL failed atomic replacement preserves existing snapshot and removes temp
   assert.equal(fs.readdirSync(directory).some((name) => name.endsWith('.tmp')), false);
 });
 
+test('WCL retries a transient file lock without rewriting or losing the previous snapshot', t => {
+  const { directory, store } = temporaryStore(t);
+  store.write('catalog.json', data(1));
+  const primary = path.join(directory, 'catalog.json');
+  let attempts = 0;
+  const retryingStore = createWarcraftLogsStore({ cacheDir: directory, fsImpl: {
+    ...fs,
+    renameSync: (from, to) => {
+      if (to === primary && ++attempts < 3) {
+        throw Object.assign(new Error('File is locked'), { code: 'EPERM' });
+      }
+
+      return fs.renameSync(from, to);
+    },
+  } });
+  retryingStore.write('catalog.json', data(2));
+  assert.equal(attempts, 3);
+  assert.deepEqual(store.read('catalog.json'), data(2));
+  assert.deepEqual(JSON.parse(fs.readFileSync(`${primary}.bak`, 'utf8')), data(1));
+});
+
+test('WCL stops retrying persistent file locks and preserves the old snapshot', t => {
+  const { directory, store } = temporaryStore(t);
+  store.write('catalog.json', data(1));
+  const primary = path.join(directory, 'catalog.json');
+  let attempts = 0;
+  const lockedStore = createWarcraftLogsStore({ cacheDir: directory, fsImpl: {
+    ...fs,
+    renameSync: (from, to) => {
+      if (to === primary) {
+        attempts++;
+        throw Object.assign(new Error('File is locked'), { code: 'EPERM' });
+      }
+
+      return fs.renameSync(from, to);
+    },
+  } });
+  assert.throws(() => lockedStore.write('catalog.json', data(2)), { code: 'STORAGE_ERROR' });
+  assert.equal(attempts, 6);
+  assert.deepEqual(store.read('catalog.json'), data(1));
+  assert.equal(fs.readdirSync(directory).some(name => name.endsWith('.tmp')), false);
+});
+
 test('WCL failed file fsync never replaces the existing snapshot', (t) => {
   const { directory, store } = temporaryStore(t);
   store.write('catalog.json', data(1));

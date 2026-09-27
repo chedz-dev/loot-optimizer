@@ -4,7 +4,7 @@ Una aplicación en React y Node.js para comparar trinkets de World of Warcraft. 
 
 El ranking se puede consultar por fuente o con ambas combinadas. También hay una sección para ver la tierlist de cada guía, sus notas y el origen de los trinkets.
 
-La versión local incluye Warcraft Logs para consultar los trinkets más usados por el top 100 de cada spec. Estos datos se muestran aparte del ranking de las guías.
+Warcraft Logs permite consultar los trinkets más usados por el top 100 de cada spec. En local podemos actualizar los datos; Pages muestra una copia publicada de los resultados. Esta popularidad se mantiene aparte del ranking de las guías.
 
 ## Ejecutar localmente
 
@@ -76,7 +76,11 @@ La [documentación de Warcraft Logs](docs/warcraftlogs-cache.md) incluye los com
 
 ## Versión estática y GitHub Pages
 
-La versión de GitHub Pages usa los rankings y tierlists generados en `public/data`, sin un servidor Node.js. Conserva las notas, el origen de los items, el autor y la fecha de actualización de las guías. No muestra paneles de administración, métricas internas ni el módulo de Warcraft Logs.
+La versión de GitHub Pages usa los rankings, tierlists y el baked de Warcraft Logs de `public/data`, sin un servidor Node.js. Conserva las notas, el origen de los items, el autor y la fecha de actualización de las guías. No muestra paneles de administración ni métricas internas.
+
+Para renovar el baked de WCL, primero actualizamos el caché local y luego ejecutamos `pnpm bake:warcraftlogs`. El exportador no consulta la API: guarda solo los resultados agregados y sus fechas en `public/data/warcraftlogs.json`. Ese archivo se revisa y se sube con el resto de los cambios. El build de Pages lo conserva; no necesita las credenciales ni la base privada.
+
+`pnpm sync:wcl:release --plan` permite revisar las consultas necesarias y `pnpm sync:wcl:release` actualiza VA y Nymrissa para heroico y mítico. El alcance se mantiene en `data/warcraftlogs-release.json`; Kith'ix queda fuera por ahora. Pages permite elegir el encuentro y la dificultad por separado.
 
 El workflow de deploy se ejecuta al hacer push a `main`, de forma manual o mediante una tarea programada cada hora:
 

@@ -8,7 +8,7 @@ Destino configurado: [GitHub Pages](https://chedz-dev.github.io/loot-optimizer/)
 
 La edición pública permite consultar recomendaciones. La administración y las métricas internas permanecen en local. Esto se aplica en dos capas: componentes que no se renderizan y archivos JSON que no contienen los campos técnicos. Ocultar una sección con CSS no protege los datos descargados.
 
-Warcraft Logs sigue siendo exclusivamente local. Publicar el static no implica publicar su módulo, sus muestras, su popularidad ni su panel de caché. Una exportación pública de WCL requiere una decisión e implementación adicionales.
+Warcraft Logs publica un baked de popularidad por spec e item, con fecha y cobertura visibles. Las capturas originales, los datos individuales, las credenciales y la administración del caché permanecen en local. Pages no consulta la API de WCL.
 
 ## Qué pasa a Pages
 
@@ -26,7 +26,8 @@ Warcraft Logs sigue siendo exclusivamente local. Publicar el static no implica p
 | IDs/fechas de snapshot, hashes, caducidad y contadores del parser | No | Disponibles en API; snapshot y contadores visibles en WH/IV por defecto |
 | Etiqueta «Actualización cada 1 h» y explicación técnica del parser IV | No | Visibles por defecto |
 | Estado/configuración de conexiones y credenciales | No | Backend y administración local según el módulo |
-| Warcraft Logs, muestras, top por spec, popularidad y actualización del caché | No | Sí |
+| Warcraft Logs: popularidad agregada, tamaño de muestra y enlaces al top por spec | Sí, con fecha de captura y solo contextos exportados | Sí |
+| Warcraft Logs: capturas individuales y actualización del caché | No | Sí |
 | Optimización, roster e historial | Botones deshabilitados; sin datos demo exportados | Botones deshabilitados; existen endpoints de demostración |
 | Idioma y selecciones recordadas | Sí, en el almacenamiento del navegador para ese origen | Sí, independientes de Pages |
 
@@ -45,6 +46,7 @@ dist/
     tierlists/wowhead.json        Guías públicas Wowhead
     tierlists/icyveins.json       Guías públicas Icy Veins
     rankings/<item-id>.json       Un resultado público por item del catálogo
+    warcraftlogs.json             Popularidad agregada y contextos disponibles
     manifest.json                schemaVersion y lista de rutas
 ```
 
@@ -62,11 +64,21 @@ Todo archivo colocado en `public/` puede acabar en `dist/`. No depositar ahí co
 
 ## Dónde se define la separación
 
+### Renovar el baked WCL
+
+Después de actualizar la base local, ejecutar `pnpm bake:warcraftlogs` y revisar `public/data/warcraftlogs.json`. La exportación es explícita y no consume API. Conserva las fechas reales, valida conteos y permite solo campos públicos; si falla, no reemplaza el baked anterior. Revisar cobertura y antigüedad antes de incluirlo en el commit. El build habitual valida ese archivo, lo añade al manifest y lo copia a `dist`; no necesita `data/warcraftlogs/` ni credenciales. El cron editorial no actualiza WCL.
+
+Para VA/Lair S2 usar `pnpm sync:wcl:release --plan` y luego `pnpm sync:wcl:release`. La lista aprobada de `data/warcraftlogs-release.json` incluye ocho bosses de VA y Nymrissa, con heroico y mítico. Kith'ix está excluido. La exportación y `check-static-build.js` exigen las 720 capturas objetivo antes de publicar; pueden contener menos de 100 parses si WCL no ofrece una muestra completa. Una entrada nueva del catálogo no se incorpora automáticamente al alcance.
+
+WCL publica porcentajes, conteos y denominadores porque son el resultado que consulta el usuario, no métricas administrativas. `capturedAt` identifica la antigüedad de esos resultados; no sustituye la fecha editorial de WH/IV. Los datos individuales, diagnósticos de descarte, cuota de API, trabajos y caducidad del caché no se exportan.
+
 | Archivo | Responsabilidad |
 | --- | --- |
 | [src/build-mode.js](../src/build-mode.js) | `VITE_STATIC_DATA=true` fuerza `showTechnicalMetadata=false`, incluso si se configura la bandera técnica en `true` |
-| [src/App.jsx](../src/App.jsx) | Solo admite Rankings, Wowhead e Icy Veins en static; una vista persistida no admitida vuelve a Rankings. No monta WCL ni carga demo/estado de fuentes |
-| [src/data-client.js](../src/data-client.js) | Traduce las cuatro rutas de lectura soportadas a JSON y rechaza escrituras o rutas sin exportación |
+| [src/App.jsx](../src/App.jsx) | Admite Rankings, Wowhead, Icy Veins y WCL en static; no carga demo/estado de fuentes |
+| [src/data-client.js](../src/data-client.js) | Traduce las lecturas editoriales a JSON; las cuatro lecturas WCL usan un único baked compartido. Rechaza escrituras y rutas administrativas |
+| [scripts/bake-warcraftlogs.js](../scripts/bake-warcraftlogs.js) | Exportación local explícita de agregados WCL, sin consultas a la API |
+| [src/warcraftlogs-static.js](../src/warcraftlogs-static.js) | Lista de campos permitidos y consultas por spec/item sobre el baked |
 | [scripts/generate-static-data.js](../scripts/generate-static-data.js) | Lee la base editorial y calcula las vistas públicas. No descarga guías ni consulta la API WCL |
 | [scripts/static-projections.js](../scripts/static-projections.js) | Selecciona campos públicos del ranking y elimina diagnósticos de captura de las guías |
 | [scripts/editorial-release.js](../scripts/editorial-release.js) y [prepare-editorial-release.js](../scripts/prepare-editorial-release.js) | Validan base y señales, seleccionan respaldo/candidata y registran antigüedad sin modificar las capturas originales |
@@ -89,7 +101,7 @@ Límite importante: la lista permitida se aplica a las entradas y metadata del r
 | Configuración | Resultado |
 | --- | --- |
 | Build normal sin `VITE_STATIC_DATA=true` | Frontend para la API Node; no asumir que sirve para Pages |
-| `VITE_STATIC_DATA=true` | Lectura de JSON, sin WCL ni administración pública |
+| `VITE_STATIC_DATA=true` | Lectura de JSON editorial y WCL agregado, sin administración pública |
 | `VITE_SHOW_TECHNICAL_METADATA=false` | Oculta el detalle técnico editorial/de ranking también en un frontend local; no convierte el backend en público ni elimina sus rutas |
 | `VITE_BASE_PATH=/loot-optimizer/` o `--base /loot-optimizer/` | Rutas correctas de assets y datos para este repositorio en Pages |
 | `--mode github` | Vite carga [.env.github](../.env.github), con static activado y detalle técnico desactivado |
@@ -183,7 +195,7 @@ Después del push:
 - Identificar en [Actions](https://github.com/chedz-dev/loot-optimizer/actions) la ejecución con el SHA esperado. Esperar `success` tanto en `build` como en `deploy`; push exitoso no equivale a despliegue terminado.
 - Abrir Pages y comprobar Rankings en los tres modos y en lista/tierlist. Revisar filtros, cambio de idioma, iconos/enlaces y «Mostrar más» en guías.
 - Confirmar autor y actualización en WH/IV, sin snapshot, frecuencia horaria, pesos, cobertura ponderada ni panel de evidencia técnica.
-- Confirmar que no existe un módulo WCL público ni se hacen peticiones al backend local. Una preferencia antigua de navegación no debe abrir un módulo privado.
+- Confirmar que WCL muestra solo los contextos publicados, su fecha y sus agregados. No debe mostrar administración ni hacer peticiones al backend local, OAuth o GraphQL.
 - Revisar los JSON servidos: catálogo, las dos tierlists, cada ranking y manifest; ausencia de campos técnicos. `data/demo.json` y `data/sources.json` deben responder 404.
 - Registrar SHA, enlace al workflow y resultado de las comprobaciones. No afirmar una auditoría visual de todas las guías si solo se revisaron muestras.
 

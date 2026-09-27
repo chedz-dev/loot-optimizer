@@ -1,5 +1,21 @@
 # Base JSON local de Warcraft Logs
 
+## Copia de consulta para Pages
+
+`pnpm bake:warcraftlogs` lee las capturas locales y escribe `public/data/warcraftlogs.json`. No consulta la API ni necesita cargar credenciales. Conserva popularidad, conteos, denominadores, contexto, enlaces al top, procedencia y temporada de los items. Excluye jugadores, reportes, respuestas crudas, tokens, trabajos y métricas administrativas mediante una lista de campos permitidos, también en objetos anidados.
+
+La fecha pública `capturedAt` conserva el `fetchedAt` original, no la hora de exportación. Una captura antigua no se vuelve reciente al compilar. La selección de encuentros en Pages solo ofrece combinaciones presentes en el baked. La comparación no convierte una spec sin muestra en un cero observado.
+
+Para publicar datos nuevos: actualizar el caché local de forma explícita, ejecutar el exportador, revisar el diff del JSON y validar el build. El build y el cron de guías conservan el baked versionado y no sincronizan WCL. Si no hay caché local o la exportación resulta inválida, el exportador falla sin reemplazar el baked anterior. No copiar la carpeta privada a `public`.
+
+El alcance de publicación se define en `data/warcraftlogs-release.json`: ocho encuentros de VA y Nymrissa, para las 40 specs en heroico y mítico. Son 720 capturas objetivo. Kith'ix queda excluido hasta que se confirme su disponibilidad en retail. WCL agrupa Nymrissa dentro de la zona 53; se conserva su ID original para las consultas y los enlaces. El baked también conserva las muestras M+ ya guardadas de S2, sin descargarlas de nuevo en esta operación.
+
+`pnpm sync:wcl:release --plan` muestra las consultas pendientes sin consumir API. `pnpm sync:wcl:release` descarga solo los contextos aprobados y omite las capturas aún vigentes. Si se interrumpe, se puede repetir el comando: reutiliza lo ya guardado y respeta las pausas persistidas. Después se ejecuta `pnpm bake:warcraftlogs`. La exportación y la validación de Pages exigen cobertura de todas las combinaciones aprobadas; una captura vacía válida se conserva como ausencia de parses, no como popularidad cero.
+
+Pages separa zona, encuentro, dificultad y partición. Al cambiar de boss conserva heroico o mítico cuando exista; al cambiar a M+ solo permite la dificultad capturada para ese contexto. No ofrece combinaciones sin datos.
+
+Los bloqueos transitorios de archivo (`EPERM`, `EACCES`, `EBUSY`) tienen hasta cinco reintentos breves al reemplazar el JSON, conservando la escritura atómica. Si persisten, se mantiene la captura anterior y el trabajo falla como antes. No se repite la consulta a WCL por cada reintento de disco.
+
 Revisión: 2026-09-07. Implementación: `server/warcraftlogs-service.js`, `server/warcraftlogs-store.js` y `server/warcraftlogs-routes.js`. Contexto: [arquitectura](architecture.md) y [decisiones de diseño](design-decisions.md).
 
 ## Lectura y actualización separadas

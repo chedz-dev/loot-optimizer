@@ -2,6 +2,8 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import { publicGuide, publicRankings } from './static-projections.js';
+import { validateWarcraftLogsStatic } from './validate-warcraftlogs-static.js';
+import { validateReleaseCoverage } from './warcraftlogs-release.js';
 
 const directory = path.resolve(process.argv[2] || 'dist');
 const dataDirectory = path.join(directory, 'data');
@@ -15,6 +17,7 @@ const forbiddenKeys = new Set([
   'score', 'scoreRange', 'confidence', 'evidenceCoverage', 'diagnostics', 'weights',
   'weight', 'effectiveWeight', 'configuredWeight', 'contribution', 'sampleSize',
   'rawRankings', 'accessToken', 'clientSecret', 'credentials', 'apiCalls', 'rateLimit',
+  'cohort', 'sourcePages', 'reportCode', 'combatantInfo', 'apiUsage',
 ]);
 // Recorre los datos anidados para impedir que se publiquen campos privados.
 function checkKeys(value, location) {
@@ -30,12 +33,15 @@ function checkKeys(value, location) {
 
 const catalog = read('catalog.json');
 assert.ok(catalog.items.length > 0, 'Empty item catalog');
-const expected = ['catalog.json', 'manifest.json', 'tierlists/wowhead.json', 'tierlists/icyveins.json',
+const expected = ['catalog.json', 'manifest.json', 'warcraftlogs.json', 'tierlists/wowhead.json', 'tierlists/icyveins.json',
   ...catalog.items.map((item) => `rankings/${item.id}.json`)];
 assert.deepEqual(filesIn(dataDirectory).sort(), expected.sort(), 'Unexpected or missing public data file');
 for (const filename of expected) {
   checkKeys(read(filename), filename);
 }
+const wcl = validateWarcraftLogsStatic(read('warcraftlogs.json'));
+validateReleaseCoverage(wcl);
+assert.deepEqual(read('manifest.json').files.map(file => file.path).sort(), expected.filter(file => file !== 'manifest.json').sort());
 
 for (const item of catalog.items) {
   const result = read(`rankings/${item.id}.json`);
@@ -62,4 +68,4 @@ for (const filename of filesIn(directory)) {
     `Private file in public build: ${filename}`);
 }
 
-console.log(`Static build passed: ${catalog.items.length} rankings, ${guideCount} attributed guides, no admin payloads or internal metrics.`);
+console.log(`Static build passed: ${catalog.items.length} rankings, ${guideCount} attributed guides, ${wcl.snapshots.length} WCL aggregates, no admin payloads or internal metrics.`);

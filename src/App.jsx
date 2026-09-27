@@ -9,7 +9,7 @@ import { useI18n } from './i18n.jsx';
 import { usePersistentState } from './use-persistent-state.js';
 import { isStaticBuild } from './build-mode.js';
 
-const publicViews = ['rankings', 'wowhead', 'icyveins'];
+const publicViews = ['rankings', 'wowhead', 'icyveins', 'warcraftlogs'];
 
 const sourceLabelKeys = {
   ready: 'source.connected',
@@ -42,7 +42,7 @@ function App() {
   const { language, setLanguage, t } = useI18n();
   const [view, setView] = usePersistentState('loot-view', 'rankings');
   const activeView = isStaticBuild && !publicViews.includes(view) ? 'rankings' : view;
-  const [warcraftLogsVisited, setWarcraftLogsVisited] = useState(!isStaticBuild && view === 'warcraftlogs');
+  const [warcraftLogsVisited, setWarcraftLogsVisited] = useState(view === 'warcraftlogs');
   const [data, setData] = useState(null);
   const [sources, setSources] = useState([]);
   const [selected, setSelected] = useState('gebbo');
@@ -52,7 +52,9 @@ function App() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    if (!isStaticBuild && view === 'warcraftlogs') setWarcraftLogsVisited(true);
+    if (view === 'warcraftlogs') {
+      setWarcraftLogsVisited(true);
+    }
   }, [view]);
 
   useEffect(() => {
@@ -116,9 +118,9 @@ function App() {
           <button className={activeView === 'rankings' ? 'active' : ''} onClick={() => setView('rankings')}><span>02</span> {t('nav.rankings')}</button>
           <button className={view === 'wowhead' ? 'active' : ''} onClick={() => setView('wowhead')}><span>03</span> {t('nav.wowhead')}</button>
           <button className={view === 'icyveins' ? 'active' : ''} onClick={() => setView('icyveins')}><span>04</span> {t('nav.icyveins')}</button>
-          {!isStaticBuild && <button className={activeView === 'warcraftlogs' ? 'active' : ''} onClick={() => setView('warcraftlogs')}><span>05</span> Warcraft Logs</button>}
-          <button className="disabled" disabled title={t('nav.soon')}><span>{isStaticBuild ? '05' : '06'}</span> {t('nav.roster')}</button>
-          <button className="disabled" disabled title={t('nav.soon')}><span>{isStaticBuild ? '06' : '07'}</span> {t('nav.history')}</button>
+          <button className={activeView === 'warcraftlogs' ? 'active' : ''} onClick={() => setView('warcraftlogs')}><span>05</span> Warcraft Logs</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>06</span> {t('nav.roster')}</button>
+          <button className="disabled" disabled title={t('nav.soon')}><span>07</span> {t('nav.history')}</button>
         </nav>
         <div className="season-card">
           <small>{t('season.active')}</small>
@@ -135,7 +137,7 @@ function App() {
         <div className="module-view" hidden={activeView !== 'rankings'}><SpecRankings /></div>
         <div className="module-view" hidden={activeView !== 'wowhead'}><WowheadTierlists /></div>
         <div className="module-view" hidden={activeView !== 'icyveins'}><IcyVeinsTierlists /></div>
-        {!isStaticBuild && warcraftLogsVisited && <div className="module-view" hidden={activeView !== 'warcraftlogs'}><WarcraftLogsPopularity active={activeView === 'warcraftlogs'} /></div>}
+        {warcraftLogsVisited && <div className="module-view" hidden={activeView !== 'warcraftlogs'}><WarcraftLogsPopularity active={activeView === 'warcraftlogs'} /></div>}
         {!isStaticBuild && !['rankings', 'wowhead', 'icyveins', 'warcraftlogs'].includes(activeView) && <>
         <header>
           <div><p className="eyebrow">DECISIÓN BASADA EN DATOS</p><h1>Optimización de trinkets</h1><p>Cruza simulaciones, rendimiento real, guías y necesidad de mejora.</p></div>

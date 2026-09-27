@@ -9,7 +9,7 @@ Documentos relacionados: [decisiones de diseño](design-decisions.md), [ranking]
 La aplicación responde a dos preguntas distintas:
 
 1. Rankings: seleccionado un trinket, qué clases/specs lo recomiendan según Wowhead, Icy Veins o su consenso editorial.
-2. Warcraft Logs, solo local: qué trinkets utiliza el top 100 de una spec en un contexto, o qué specs de las ya capturadas utilizan un trinket.
+2. Warcraft Logs: qué trinkets utiliza el top 100 de una spec en un contexto, o qué specs de las ya capturadas utilizan un trinket. Actualización local y copia agregada de consulta en Pages.
 
 Las tierlists originales reconstruyen tier, orden y comentarios de cada guía para poder contrastar el resultado. No son una simulación propia. Optimización de asignaciones, roster e historial permanecen deshabilitados en la navegación; existen código y endpoints de demostración, pero no constituyen un sistema completo de loot council.
 
@@ -25,6 +25,7 @@ Warcraft Logs API
   -> OAuth/GraphQL, solo actualización explícita
   -> validación + agregación -> data/warcraftlogs/*.json
        -> API de lectura local -> módulo React Warcraft Logs
+       -> bake:warcraftlogs -> public/data/warcraftlogs.json -> mismo módulo React en Pages
        -> recálculo offline desde rawRankings
 ```
 
@@ -175,6 +176,8 @@ El filtro Raid/M+ de Rankings selecciona procedencia de items. El contexto de re
 Las cards editoriales comparten `EditorialItemCard`: descripción dentro del recuadro, expansión si supera 125 caracteres o hay datos de drop, y procedencia junto a la etiqueta. Solo el icono abre el item en Wowhead en otra pestaña; el cuerpo expande detalles cuando corresponde. Los iconos de spec ofrecen enlaces a ambas guías. Los nombres de items usan `localizedNames`; notas del autor, nombres de bosses y specs no se traducen automáticamente por esa selección.
 
 ## Publicación estática y seguridad
+
+WCL tiene un exportador explícito, `scripts/bake-warcraftlogs.js`, que lee el caché privado y genera solo agregados. `src/warcraftlogs-static.js` aplica la lista de campos permitidos y resuelve las cuatro lecturas de catálogo, popularidad, items y comparación por item. `data-client.js` descarga el baked una vez por sesión. Los efectos de administración quedan desactivados en static y sus endpoints no tienen adaptación pública. Las fechas de captura no se renuevan al compilar. `validate-warcraftlogs-static.js` comprueba campos, identidades, conteos y denominadores antes de generar y publicar.
 
 `generate-static-data.js` lee la base editorial, no consulta WCL y no descarga guías por sí mismo. Produce catálogo, ambas tierlists, un ranking público por item del catálogo y manifest. No produce `sources.json` ni `demo.json`. `data-client.js` soporta las rutas de lectura de catálogo, tierlists y ranking por item, y rechaza escrituras o rutas sin exportación. No basta con añadir un endpoint Node para que exista en Pages. El contrato de campos, banderas, límites de seguridad y procedimiento operativo se mantiene en [la guía de deploy](deployment.md), revisada el 2026-09-11.
 
