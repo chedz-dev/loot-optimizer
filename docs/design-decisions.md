@@ -60,7 +60,7 @@ La publicación estática aplica una lista explícita de campos permitidos para 
 
 Actualización 2026-09-27: separar descarga de guías y build. Los push compilan sin sincronizar; cron o petición manual intentan renovar una copia candidata. Ante HTTP 403, timeout o incoherencia se conserva la base validada completa, sin mezclar una descarga parcial ni cambiar sus fechas. El respaldo de CI se promueve tras tests/build/validación pública. La antigüedad y el uso de fallback se advierten en Actions. Sin base válida no hay publicación; el respaldo no certifica frescura ni sustituye una auditoría visual del parser.
 
-La popularidad WCL se exporta explícitamente con `pnpm bake:warcraftlogs`. Pages conserva conteos, porcentajes, denominadores, fecha real y enlaces al top. No copia `data/warcraftlogs/`, no contiene tokens ni ejecuta jobs. CI valida el baked versionado sin renovarlo. La UI ofrece solo contextos capturados y mantiene la popularidad separada del ranking editorial.
+La popularidad WCL se exporta explícitamente con `pnpm bake:warcraftlogs`. Pages conserva conteos, porcentajes, denominadores y enlaces al top. La fecha real permanece en el JSON para validación, no en la interfaz pública. No se muestran avisos de baked, API, caché ni fechas de captura; los datos técnicos se consultan en local. No copia `data/warcraftlogs/`, no contiene tokens ni ejecuta jobs. CI valida el baked versionado sin renovarlo. La UI ofrece solo contextos capturados y mantiene la popularidad separada del ranking editorial.
 
 ## D09. Estado de interfaz persistente y módulos conservados
 

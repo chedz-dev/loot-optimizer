@@ -280,13 +280,12 @@ export default function WarcraftLogsPopularity({ active }) {
     : (job?.status === 'running' ? 'wcl.syncing' : job?.status === 'interrupted' ? 'wcl.syncInterrupted' : job?.status === 'failed' ? 'wcl.syncFailed' : 'wcl.syncComplete');
 
   return <div className="spec-module wcl-module">
-    <header className="rankings-hero"><div><p className="eyebrow">{t('wcl.eyebrow')}</p><h1>{t('wcl.title')}</h1><p>{t('wcl.subtitle')}</p></div><span className="wcl-local-badge">{t(isStaticBuild ? 'wcl.baked' : 'wcl.local')}</span></header>
+    <header className="rankings-hero"><div><p className="eyebrow">{t('wcl.eyebrow')}</p><h1>{t('wcl.title')}</h1><p>{t('wcl.subtitle')}</p></div>{!isStaticBuild && <span className="wcl-local-badge">{t('wcl.local')}</span>}</header>
 
     {catalogError && <div className="error-inline" role="alert">{catalogError} <button className="wcl-secondary" onClick={() => setRetry((current) => current + 1)}>{t('wcl.retry')}</button></div>}
     {!catalog && !catalogError && <div className="module-loading" role="status">{t('wcl.loading')}</div>}
     {catalog && !isStaticBuild && !catalog.configured && <div className="wcl-notice">{t('wcl.notConfigured')}</div>}
     {catalog && !zone && <div className="wcl-notice">{t(isStaticBuild ? 'wcl.bakedMissing' : 'wcl.noZones')}</div>}
-    {catalog && isStaticBuild && <div className="wcl-notice"><p>{t('wcl.bakedNote')}</p><p>{t('wcl.dataDates', { from: formatDate(catalog.oldestCaptureAt), to: formatDate(catalog.newestCaptureAt) })}</p></div>}
 
     {!isStaticBuild && <section className="panel wcl-cache-panel">
       <div className="panel-head"><div><h2>{t('wcl.database')}</h2><p>{t('wcl.databaseNote')}</p></div><button className="wcl-secondary" onClick={() => setRevision((current) => current + 1)} disabled={startingSync}>{t('wcl.reloadLocal')}</button></div>
@@ -333,7 +332,7 @@ export default function WarcraftLogsPopularity({ active }) {
         {cachedCatalog && <p className="wcl-season-count" role="status">{t('wcl.seasonCount', { visible: visibleItems.length, total: cachedCatalog.items.length })}</p>}
         <div className="wcl-item-picker">{visibleItems.map((item) => <article className={sameId(selectedItem?.itemId, item.itemId) ? 'active' : ''} key={item.itemId}><ItemIcon item={item} tooltip /><button onClick={() => setItemId(item.itemId)} aria-pressed={sameId(selectedItem?.itemId, item.itemId)}><span>{localizedItemName(item, language)}</span><ItemAcquisition item={item} currentSeason={catalog.currentItemSeason} t={t} /></button></article>)}</div>
         {!cachedCatalog && loadingKey === contextQuery && <p className="wcl-empty" role="status">{t('wcl.loading')}</p>}
-        {cachedCatalog && !visibleItems.length && <p className="wcl-empty">{t(!cachedCatalog.items.length ? 'wcl.noItems' : !seasonItems.length ? 'wcl.noSeasonItems' : 'wcl.noMatch')}</p>}
+        {cachedCatalog && !visibleItems.length && <p className="wcl-empty">{t(!cachedCatalog.items.length ? (isStaticBuild ? 'wcl.noItemsPublic' : 'wcl.noItems') : !seasonItems.length ? 'wcl.noSeasonItems' : 'wcl.noMatch')}</p>}
         <div className="wcl-sync"><div><p>{t('wcl.coverageNote')}</p></div></div>
       </section>}
 
@@ -342,7 +341,7 @@ export default function WarcraftLogsPopularity({ active }) {
 
       {mode === 'spec' && result && <>
         <div className="wcl-sample-summary"><div><span>{t('wcl.metric')}</span><strong>{metricName(result.metric)}</strong></div><div><span>{t('wcl.sample')}</span><strong>{result.rankingRows ?? result.sampledCharacters} / {result.targetSampleSize || 100}</strong></div><div><span>{t('wcl.validGear')}</span><strong>{result.validCharacters}</strong></div>{!isStaticBuild && <><div><span>{t('wcl.missingGear')}</span><strong>{result.missingGear}</strong></div><div><span>{t('wcl.duplicates')}</span><strong>{result.duplicateCharacters || 0}</strong></div><div><span>{t('wcl.invalidIdentity')}</span><strong>{result.invalidIdentity || 0}</strong></div></>}</div>
-        {result.stale && <div className="wcl-notice" role="status">{t('wcl.stale')}{result.error && <p>{result.error}</p>}</div>}
+        {!isStaticBuild && result.stale && <div className="wcl-notice" role="status">{t('wcl.stale')}{result.error && <p>{result.error}</p>}</div>}
         {result.status === 'incomplete' && <div className="wcl-notice">{t('wcl.incomplete')}</div>}
         <section className="panel wcl-results" aria-busy={loadingKey === specKey}>
           <div className="panel-head"><div className="wcl-spec-heading"><ClassSpecIcon kind="spec" classId={result.spec.classId} specId={result.spec.specId} label={result.spec.specName} /><div><h2>{result.spec.specName} {result.spec.className}</h2><p>{result.context.encounterName} · {result.context.difficultyName}</p></div></div><SpecRankingLink url={result.sourceUrl} spec={result.spec} context={result.context} t={t} /></div>
@@ -350,7 +349,7 @@ export default function WarcraftLogsPopularity({ active }) {
           <div className="wcl-table-head"><span>Trinket</span><span>{t('wcl.popularity')} · {t('wcl.players')}</span><span>{t('wcl.itemLevel')}</span></div>
           <div className="wcl-rows">{specSeasonItems.map((item) => <article key={item.itemId}><div className="wcl-item-identity"><ItemIcon item={item} tooltip /><div><b>{localizedItemName(item, language)}</b><ItemAcquisition item={item} currentSeason={catalog.currentItemSeason} t={t} /></div></div><Popularity entry={{ ...item, validCharacters: result.validCharacters }} language={language} t={t} /><span className="wcl-ilvl">{item.averageItemLevel == null ? '-' : Number(item.averageItemLevel).toLocaleString(language, { maximumFractionDigits: 1 })}</span></article>)}</div>
           {!specSeasonItems.length && <p className="wcl-empty">{t(result.items.length ? 'wcl.noSeasonItems' : 'wcl.noSample')}</p>}
-          <div className="wcl-freshness"><span>{t('wcl.snapshot')}: {formatDate(result.capturedAt || result.fetchedAt)}</span>{!isStaticBuild && <span>{t('wcl.expires')}: {formatDate(result.expiresAt)}</span>}</div>
+          {!isStaticBuild && <div className="wcl-freshness"><span>{t('wcl.snapshot')}: {formatDate(result.fetchedAt)}</span><span>{t('wcl.expires')}: {formatDate(result.expiresAt)}</span></div>}
         </section>
       </>}
 

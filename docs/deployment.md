@@ -8,7 +8,9 @@ Destino configurado: [GitHub Pages](https://chedz-dev.github.io/loot-optimizer/)
 
 La edición pública permite consultar recomendaciones. La administración y las métricas internas permanecen en local. Esto se aplica en dos capas: componentes que no se renderizan y archivos JSON que no contienen los campos técnicos. Ocultar una sección con CSS no protege los datos descargados.
 
-Warcraft Logs publica un baked de popularidad por spec e item, con fecha y cobertura visibles. Las capturas originales, los datos individuales, las credenciales y la administración del caché permanecen en local. Pages no consulta la API de WCL.
+Warcraft Logs publica popularidad por spec e item y cobertura de las muestras. La interfaz de Pages no muestra avisos sobre el baked, caché, API, frecuencia de actualización, rangos de captura ni «Última consulta». Tampoco muestra etiquetas como «Datos publicados». Esa información técnica pertenece a la operación local, no a la vista pública.
+
+Esta regla aplica a todos los módulos, también a sus estados de carga y mensajes sin resultados. Se conservan los avisos útiles para interpretar los resultados, como muestras incompletas o ausencia de datos, y el autor y la fecha editorial de las guías de Wowhead e Icy Veins. No confundir esas fechas editoriales con fechas técnicas de captura. Las capturas originales, los datos individuales, las credenciales y la administración del caché permanecen en local. Pages no consulta la API de WCL.
 
 ## Qué pasa a Pages
 
@@ -70,7 +72,7 @@ Después de actualizar la base local, ejecutar `pnpm bake:warcraftlogs` y revisa
 
 Para VA/Lair S2 usar `pnpm sync:wcl:release --plan` y luego `pnpm sync:wcl:release`. La lista aprobada de `data/warcraftlogs-release.json` incluye ocho bosses de VA y Nymrissa, con heroico y mítico. Kith'ix está excluido. La exportación y `check-static-build.js` exigen las 720 capturas objetivo antes de publicar; pueden contener menos de 100 parses si WCL no ofrece una muestra completa. Una entrada nueva del catálogo no se incorpora automáticamente al alcance.
 
-WCL publica porcentajes, conteos y denominadores porque son el resultado que consulta el usuario, no métricas administrativas. `capturedAt` identifica la antigüedad de esos resultados; no sustituye la fecha editorial de WH/IV. Los datos individuales, diagnósticos de descarte, cuota de API, trabajos y caducidad del caché no se exportan.
+WCL publica porcentajes, conteos y denominadores porque son el resultado que consulta el usuario, no métricas administrativas. `capturedAt` se conserva en el JSON para validar la antigüedad real, pero no se renderiza en Pages ni sustituye la fecha editorial de WH/IV. Los datos individuales, diagnósticos de descarte, cuota de API, trabajos y caducidad del caché no se exportan.
 
 | Archivo | Responsabilidad |
 | --- | --- |
@@ -195,7 +197,7 @@ Después del push:
 - Identificar en [Actions](https://github.com/chedz-dev/loot-optimizer/actions) la ejecución con el SHA esperado. Esperar `success` tanto en `build` como en `deploy`; push exitoso no equivale a despliegue terminado.
 - Abrir Pages y comprobar Rankings en los tres modos y en lista/tierlist. Revisar filtros, cambio de idioma, iconos/enlaces y «Mostrar más» en guías.
 - Confirmar autor y actualización en WH/IV, sin snapshot, frecuencia horaria, pesos, cobertura ponderada ni panel de evidencia técnica.
-- Confirmar que WCL muestra solo los contextos publicados, su fecha y sus agregados. No debe mostrar administración ni hacer peticiones al backend local, OAuth o GraphQL.
+- Confirmar en ES y EN que WCL muestra solo contextos y resultados útiles: sin banner del baked, «Datos publicados», rangos de captura, «Última consulta», caducidad, frecuencia del caché ni instrucciones para actualizar una base local. Revisar las vistas por spec y por item, incluidos estados vacíos. No debe mostrar administración ni hacer peticiones al backend local, OAuth o GraphQL. Mantener autor y fecha editorial de WH/IV.
 - Revisar los JSON servidos: catálogo, las dos tierlists, cada ranking y manifest; ausencia de campos técnicos. `data/demo.json` y `data/sources.json` deben responder 404.
 - Registrar SHA, enlace al workflow y resultado de las comprobaciones. No afirmar una auditoría visual de todas las guías si solo se revisaron muestras.
 

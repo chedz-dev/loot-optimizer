@@ -4,7 +4,7 @@
 
 `pnpm bake:warcraftlogs` lee las capturas locales y escribe `public/data/warcraftlogs.json`. No consulta la API ni necesita cargar credenciales. Conserva popularidad, conteos, denominadores, contexto, enlaces al top, procedencia y temporada de los items. Excluye jugadores, reportes, respuestas crudas, tokens, trabajos y métricas administrativas mediante una lista de campos permitidos, también en objetos anidados.
 
-La fecha pública `capturedAt` conserva el `fetchedAt` original, no la hora de exportación. Una captura antigua no se vuelve reciente al compilar. La selección de encuentros en Pages solo ofrece combinaciones presentes en el baked. La comparación no convierte una spec sin muestra en un cero observado.
+El campo `capturedAt` del JSON conserva el `fetchedAt` original para validación, no la hora de exportación. No se muestra en la interfaz de Pages: los avisos de baked, API y caché, las fechas de captura y la última consulta son información técnica de operación local. Una captura antigua no se vuelve reciente al compilar. La selección de encuentros en Pages solo ofrece combinaciones presentes en el baked. La comparación no convierte una spec sin muestra en un cero observado.
 
 Para publicar datos nuevos: actualizar el caché local de forma explícita, ejecutar el exportador, revisar el diff del JSON y validar el build. El build y el cron de guías conservan el baked versionado y no sincronizan WCL. Si no hay caché local o la exportación resulta inválida, el exportador falla sin reemplazar el baked anterior. No copiar la carpeta privada a `public`.
 
